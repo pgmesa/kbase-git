@@ -27,8 +27,6 @@ commands = {
 
 def main():
     global counter
-    print("----------- KeyBase-git Uploader -----------")
-    print("--------------------------------------------")
     print(f" -> Cwd: '{dir_}'")
     print(f" -> Keybase username chosen: '{username}'")
     args = sys.argv; args.pop(0)
@@ -44,6 +42,13 @@ def main():
                 print("[%] Configured paths:")
                 for path in paths: print(f" -> {path}")
                 if command == 'upload':
+                    for path in paths:
+                        if not check_name(Path(path).name):
+                            break
+                    else:
+                        print("[%] Everything seems up to date")
+                        sleep(2)
+                        return
                     print(f"[!] Countdown activated, your configured paths will be uploaded to keybase in {counter} seconds, press ctrl-c to cancel")
                     print(f"[%] -> ", end="", flush=True)
                     while counter > 0:
@@ -59,7 +64,6 @@ def main():
             print(f"[!] '{command}' is not a valid command!") 
             print_help()
     else: print_help()
-    print("--------------------------------------------")
 
 # ---------- Utils ----------------
 def get_config() -> dict:
@@ -67,13 +71,21 @@ def get_config() -> dict:
         config = json.load(file)
         return config
 
-def process_git_stdout(out:str) -> list:
+def process_listed_stdout(out:str) -> list:
     return list(filter(lambda path: path != "", out.split('\n')))
         
 def print_help():
     print("[?] Commands:")
     for command, info in commands.items():
         print(f"     - {command}: {info}")
+
+def check_name(dirname:str) -> bool:
+    process = run(f'keybase fs ls {kbpath_to_upload} --one', shell=True, stdout=PIPE)
+    out = process.stdout.decode()
+    kb_folders:list = process_listed_stdout(out)
+    if dirname in kb_folders:
+        return True
+    return False
 
 # ------------ Commands --------------
 def upload(paths:list):
@@ -89,19 +101,16 @@ def upload(paths:list):
         if process.returncode != 0:
             print(" -> [!] Upload failed, 'git ls-files' command failed (git not installed or not a git repo)")
             continue
-        out = process.stdout.decode()[:-1]
-        paths_to_upload:list = process_git_stdout(out)
+        out = process.stdout.decode()
+        paths_to_upload:list = process_listed_stdout(out)
         if len(paths_to_upload) == 0:
             print(" -> [!] This directory has no files added to git")
             continue
         # Eliminamos archivos y movemos el .git a keybase
         git_path = Path(path).resolve()
         keybase_path = kbpath_to_upload+"/"+git_path.name
-        # Vemos is el nombre ya existe en keybase
-        process = run(f'keybase fs ls {kbpath_to_upload}', shell=True, stdout=PIPE)
-        out = process.stdout.decode()[:-1]
-        kb_folders:list = process_git_stdout(out)
-        if git_path.name in kb_folders:
+        # Vemos si el nombre ya existe en keybase
+        if check_name(git_path.name):
             print(f" -> [!] '{git_path.name}' folder already exists in '{kbpath_to_upload}'")
             continue
         run(f'keybase fs mkdir {keybase_path}')
@@ -143,7 +152,10 @@ def download(paths:list):
 if "__main__" == __name__:
     try:
         print("[%] Program started (ctrl-c to exit)")
+        print("----------- KeyBase-git Uploader -----------")
+        print("--------------------------------------------")
         main()
+        print("--------------------------------------------")
         print("[%] Program finished successfully")
     except KeyboardInterrupt:
         print("[!] Exit")
