@@ -11,7 +11,8 @@ from subprocess import Popen, run, PIPE
 # Change the user name to the one you use in keybase
 username = 'pgmesa'
 # Change the time the countdown will last (seconds)
-counter = 15
+counter = 10
+time_to_exit = 5 
 # -------------------------
 
 dir_ = Path(os.getcwd()).resolve()
@@ -46,15 +47,11 @@ def main():
                         if not check_name(Path(path).name):
                             break
                     else:
-                        print("[%] Everything seems up to date")
+                        print("[%] Everything seems already uploaded")
                         return
-                    print(f"[!] Countdown activated, your configured paths will be uploaded to keybase in {counter} seconds, press ctrl-c to cancel")
-                    print(f"[%] -> ", end="", flush=True)
-                    while counter > 0:
-                        print(f" {counter}", end="", flush=True)
-                        sleep(1)
-                        counter -= 1
-                    print() # Blank space
+                    msg1 = f"your configured paths will be uploaded to keybase in {counter} seconds"
+                    print(f"[!] Countdown activated, {msg1} (press ctrl-c to cancel)")
+                    init_counter(counter)
             if command == 'upload':
                 upload(paths=paths)
             elif command == 'download':
@@ -85,6 +82,15 @@ def check_name(dirname:str) -> bool:
     if dirname in kb_folders:
         return True
     return False
+
+def init_counter(seconds:int):
+    t = seconds
+    print(f"[%] -> ", end="", flush=True)
+    while t > 0:
+        print(f" {t}", end="", flush=True)
+        sleep(1)
+        t -= 1
+    print() # Blank space
 
 # ------------ Commands --------------
 def upload(paths:list):
@@ -163,4 +169,5 @@ if "__main__" == __name__:
         print(f"[!] Unexpected Error: {err}")
         input("-> Press Enter to exit")
         exit(1)
-    sleep(5)
+    print(f"[%] Program will exit in {time_to_exit} seconds:")
+    init_counter(time_to_exit)
