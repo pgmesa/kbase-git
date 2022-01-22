@@ -47,7 +47,6 @@ def main():
                             break
                     else:
                         print("[%] Everything seems up to date")
-                        sleep(2)
                         return
                     print(f"[!] Countdown activated, your configured paths will be uploaded to keybase in {counter} seconds, press ctrl-c to cancel")
                     print(f"[%] -> ", end="", flush=True)
@@ -164,3 +163,4 @@ if "__main__" == __name__:
         print(f"[!] Unexpected Error: {err}")
         input("-> Press Enter to exit")
         exit(1)
+    sleep(5)
