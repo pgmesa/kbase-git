@@ -6,11 +6,16 @@ from time import sleep
 from pathlib import Path
 from subprocess import Popen, run, PIPE
 
+# --- User Variables
+# -------------------------
 # Change the user name to the one you use in keybase
-# -------------------------
 username = 'pgmesa'
+# Change the time the countdown will last (seconds)
+counter = 15
 # -------------------------
+
 dir_ = Path(os.getcwd()).resolve()
+execution_path = Path(__file__).resolve().parent
 
 config_fname = 'config.json'
 kbpath_to_upload = f'/keybase/private/{username}'
@@ -20,7 +25,6 @@ commands = {
     'download': "Downloads the previous files uploaded to the original git repository, --configured-paths",
 }
 
-counter = 20
 def main():
     global counter
     print("----------- KeyBase-git Uploader -----------")
@@ -41,9 +45,9 @@ def main():
                 for path in paths: print(f" -> {path}")
                 if command == 'upload':
                     print(f"[!] Countdown activated, your configured paths will be uploaded to keybase in {counter} seconds, press ctrl-c to cancel")
-                    print(f"[%] -> ", end="")
+                    print(f"[%] -> ", end="", flush=True)
                     while counter > 0:
-                        print(f" {counter}", end="")
+                        print(f" {counter}", end="", flush=True)
                         sleep(1)
                         counter -= 1
                     print() # Blank space
@@ -59,7 +63,7 @@ def main():
 
 # ---------- Utils ----------------
 def get_config() -> dict:
-    with open(config_fname, 'rb') as file:
+    with open(execution_path/config_fname, 'rb') as file:
         config = json.load(file)
         return config
 
@@ -75,6 +79,8 @@ def print_help():
 def upload(paths:list):
     print("[%] Uploading paths...")  
     for path in paths:
+        if type(path) != Path:
+            path = Path(path).resolve()
         if not os.path.exists(path):
             print(f"[!] '{path}' doesn't exist (ignoring)")
             continue
@@ -103,7 +109,7 @@ def upload(paths:list):
         if process.returncode != 0:
             print(" -> [!] Some errors appeared in the process")
         process = run('git commit -m "Keybase Upload"', shell=True, cwd=git_path, stdout=PIPE)
-        move = run(f"keybase fs mv {git_path/'.git'} {keybase_path}")
+        move = run(f"keybase fs mv .git {keybase_path}", cwd=git_path)
         if move.returncode != 0:
             print(" -> [!] Could not move .git folder into keybase")      
         else:
@@ -112,6 +118,8 @@ def upload(paths:list):
 def download(paths:list):
     print("[%] Downloading paths...")  
     for path in paths:
+        if type(path) != Path:
+            path = Path(path).resolve()
         if not os.path.exists(path):
             print(f"[!] '{path}' doesn't exist (ignoring)")
             continue
@@ -119,7 +127,8 @@ def download(paths:list):
         # Movemos el .git de keybase a su carpeta original y restauramos los archivos
         git_path = Path(path).resolve()
         keybase_path = kbpath_to_upload+"/"+git_path.name
-        move = run(f"keybase fs mv {keybase_path+'/.git'} {git_path}", stderr=PIPE)
+        
+        move = run(f"keybase fs mv {keybase_path+'/.git'} .", cwd=git_path, stderr=PIPE, stdout=PIPE)
         if move.returncode != 0:
             print(f" -> [!] Could not download .git folder, maybe '{git_path.name}' doesn't exist on keybase")
             continue
@@ -143,34 +152,3 @@ if "__main__" == __name__:
         print(f"[!] Unexpected Error: {err}")
         input("-> Press Enter to exit")
         exit(1)
-        
-        
-        
-
-# def split_path(file_path:str):
-#     file_path = file_path.replace("\\", "/")
-#     file, file_extension = os.path.splitext(file_path)
-#     splitted = file.split("/")
-#     filename = splitted[len(splitted)-1]
-#     dirpath = file.removesuffix(filename)
-    
-#     return filename+file_extension, dirpath
-
-# def get_dirs_to_create(dir_path:str):
-#     dir_path = dir_path.replace("\\", "/")
-#     dirs = list(filter(lambda path: path != "", dir_path.split('/')))
-#     acum = ""; dirs_to_create = []
-#     for dir_name in dirs:
-#         acum += dir_name+"/"
-#         dirs_to_create.append(acum)
-
-#     return dirs_to_create
-
-# def mkdirs(base_path,  path_to_create:str, keybase=False):
-#     if keybase:
-#         dirs_to_create = get_dirs_to_create(path_to_create)
-#         print(dirs_to_create)
-#         for dir_path in dirs_to_create:
-#             run(f'keybase fs mkdir {base_path}/{dir_path}/')
-#     else:
-#         ...

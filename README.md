@@ -7,6 +7,14 @@ con el fin de que si os roban el ordenador el código fuente que desarrollemos e
     - upload ['--configured-paths']
     - download ['--configured-paths']
 Si se pone ['--configured-paths'], en vez de mover o descargar el directorio en el que os encontreis, subirá/descargará todos los paths a keybase que hayais puesto en el archivo 'config.json'
+```
+{
+    "paths":[
+        "C:\\example\\for\\windows\\path",
+        "C:/example/for/posix/path"
+    ]
+}
+```
 
 ### Requirements
 - Python >= 3.7
