@@ -1,7 +1,7 @@
 # KeyBase-Git
 
 Este programa sirve para subir a keybase de forma automatica y periodica, proyectos de git guardados en el ordenador,
-con el fin de que si os roban el ordenador el código fuente que desarrollemos este encriptado en los servidores de keybase y no en vuestros ordenadores (fácil de hackear y de acceder a la info que teneis dentro sin el pin).
+con el fin de que si os roban el ordenador el código fuente que desarrollemos este encriptado en los servidores de keybase y no en vuestros ordenadores, que por lo general son fáciles de hackear y de acceder a la info que teneis dentro sin el pin.
 
 ### Modo de uso
     - upload ['--config-paths']
