@@ -22,8 +22,8 @@ config_fname = 'config.json'
 kbpath_to_upload = f'/keybase/private/{username}'
 
 commands = {
-    'upload': "Upload the added files of a git repository to keybase (including .git folder), --configured-paths",
-    'download': "Downloads the previous files uploaded to the original git repository, --configured-paths",
+    'upload': "Upload the added files of a git repository to keybase (including .git folder), --config-paths",
+    'download': "Downloads the previous files uploaded to the original git repository, --config-paths",
 }
 
 def main():
@@ -35,7 +35,7 @@ def main():
         command = args[0]
         paths = [dir_]
         if command == 'upload' or command == 'download':
-            if "--configured-paths" in args: 
+            if "--config-paths" in args: 
                 paths:list = get_config()['paths']
                 if len(paths) == 0:
                     print("[!] No paths configured to upload/download")
