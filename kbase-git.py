@@ -1,11 +1,18 @@
 
 import os
-from re import T
 import sys
 import json
 from time import sleep
 from pathlib import Path
 from subprocess import CalledProcessError, Popen, run, PIPE
+
+# -- Python version check ---
+dig1, dig2 = sys.version.split('.')[:2]
+require_d1, require_d2 = 3, 7
+if require_d1 > int(dig1) or require_d2 > int(dig2):
+    print("[!] ERROR: The python version must be 3.7 or higher")
+    exit(1)
+# ---------------------------
 
 # --- User Variables
 # -------------------------
