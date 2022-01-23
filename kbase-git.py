@@ -1,10 +1,11 @@
 
 import os
+from re import T
 import sys
 import json
 from time import sleep
 from pathlib import Path
-from subprocess import Popen, run, PIPE
+from subprocess import CalledProcessError, Popen, run, PIPE
 
 # --- User Variables
 # -------------------------
@@ -26,8 +27,10 @@ commands = {
     'download': "Downloads the previous files uploaded to the original git repository, --config-paths",
 }
 
+counter_flag = False
+
 def main():
-    global counter
+    global counter, counter_flag
     print(f" -> Cwd: '{dir_}'")
     print(f" -> Keybase username chosen: '{username}'")
     args = sys.argv; args.pop(0)
@@ -35,6 +38,17 @@ def main():
         command = args[0]
         paths = [dir_]
         if command == 'upload' or command == 'download':
+            print("[%] Iniciando sesión en keybase (ctrl-c para reintentar si se queda pillado)...")
+            print("[%] Puede ser necesario tener que reintentar un par de veces")    
+            print("[%] En ocasiones el cuadro no se muestra en pantalla pero esta abierto en la barra de tareas")
+            print("[%] En caso de que no salga un cuadro de input, reintentar comando o iniciar sesion desde la app de keybase")
+            if not login_intent():
+                print("[!] No se pudo iniciar sesion en KeyBase")
+                return
+            else:
+                print("[%] Sesion iniciada con exito")
+            if "--counter" in args:
+                counter_flag = True
             if "--config-paths" in args: 
                 paths:list = get_config()['paths']
                 if len(paths) == 0:
@@ -49,9 +63,10 @@ def main():
                     else:
                         print("[%] Everything seems already uploaded")
                         return
-                    msg1 = f"your configured paths will be uploaded to keybase in {counter} seconds"
-                    print(f"[!] Countdown activated, {msg1} (press ctrl-c to cancel)")
-                    init_counter(counter)
+                    if counter_flag:
+                        msg1 = f"your configured paths will be uploaded to keybase in {counter} seconds"
+                        print(f"[!] Countdown activated, {msg1} (press ctrl-c to cancel)")
+                        init_counter(counter)
             if command == 'upload':
                 upload(paths=paths)
             elif command == 'download':
@@ -62,6 +77,18 @@ def main():
     else: print_help()
 
 # ---------- Utils ----------------
+def login_intent() -> bool:
+    try:
+        run('keybase login', check=True, shell=True)
+    except CalledProcessError:
+        return False
+    except KeyboardInterrupt:
+        answer = str(input("[%] Reintentar login? (y/n): "))
+        if answer.lower() == "y":
+            return login_intent()
+        return False
+    return True
+    
 def get_config() -> dict:
     with open(execution_path/config_fname, 'rb') as file:
         config = json.load(file)
@@ -169,5 +196,6 @@ if "__main__" == __name__:
         print(f"[!] Unexpected Error: {err}")
         input("-> Press Enter to exit")
         exit(1)
-    print(f"[%] Program will exit in {time_to_exit} seconds:")
-    init_counter(time_to_exit)
+    if counter_flag:
+        print(f"[%] Program will exit in {time_to_exit} seconds:")
+        init_counter(time_to_exit)
