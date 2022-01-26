@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 "<absolute path to kbase-git.py>" $@
+python3 /path/to/kbase-git.py $@
