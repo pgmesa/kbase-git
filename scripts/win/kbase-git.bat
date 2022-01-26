@@ -1,3 +1,3 @@
 @echo off
 
-py "<absolute path to kbase-git.py>" %*
+py "C:\\absolute\\path\\to\\kbase-git.py" %*

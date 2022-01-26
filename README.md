@@ -25,5 +25,23 @@ Si se pone ['--config-paths'], en vez de mover o descargar el directorio en el q
 - También tenéis que activar la opción de abrir keybase on startup, para que se os inicie cuando encendáis el ordenador (no se os abre la interfaz de usuario, solo se inicia internamente y permite que el programa pueda interactuar con keybase sin que toquéis nada)
 - De normal estas dos opciones que os he comentado vienen activadas ya por defecto, pero por si acaso no, activadlas
 - A continuacion abrir el archivo 'kbase-git.py' y poned vuestro nombre de usuario en la variable 'username'
-- Para acceder al script de forma global desde cualquier path y sin tener que ejecutar 'python ...' teneis que coger el script que esta en 'scripts/[OS]/' correspondiente a vuestro systema operativo (windows o posix (mac y linux)), editar el path que hay dentro poniendo la ruta absoluta de donde guardéis el archivo 'kbase-git.py' y poner el script en la variable PATH de vuestro ordenador para poder ejecutarlo de forma global.
+
+### Intalar de forma Global 
+- Para acceder al script de forma global desde cualquier path y sin tener que ejecutar 'python ...' teneis que coger el script que esta en 'scripts/[OS]/kbase-git.[OS]' correspondiente a vuestro systema operativo (windows o posix (mac y linux)), editar el path que hay dentro poniendo la ruta absoluta de donde guardéis el archivo 'kbase-git.py' y ejecutar el instalador correspondiente 'installer.[OS]' (en caso de Posix, ya están dados los permisos de ejecución a los archivos).
+
+Linux y Mac
+```
+#!/bin/bash
+
+python3 /path/to/kbase-git.py $@
+```
+Windows
+```
+@echo off
+
+py "C:\\absolute\\path\\to\\kbase-git.py" %*
+```
+- Para comprobar que esta bien instalado, ejecutad 'kbase-git' desde una shell en un path distinto al del proyecto y debería desplegaros la ayuda del programa.
+
+### Añadir Task en el ordenador
 - Para que se ejecute todos los días varias veces de forma automática del script, hay que crear un TASK en el ordenador que ejecute 'kbase-git --config-paths --counter' (ya veremos como poneros el task a cada uno (en Windows es fácil y en MAC o Linux habrá que investigar).
