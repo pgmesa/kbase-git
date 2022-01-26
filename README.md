@@ -27,7 +27,7 @@ Si se pone ['--config-paths'], en vez de mover o descargar el directorio en el q
 - A continuacion abrir el archivo 'kbase-git.py' y poned vuestro nombre de usuario en la variable 'username'
 
 ### Intalar de forma Global 
-- Para acceder al script de forma global desde cualquier path y sin tener que ejecutar 'python ...' teneis que coger el script que esta en 'scripts/[OS]/kbase-git.[OS]' correspondiente a vuestro systema operativo (windows o posix (mac y linux)), editar el path que hay dentro poniendo la ruta absoluta de donde guardéis el archivo 'kbase-git.py' y ejecutar el instalador correspondiente 'installer.[OS]' (en caso de Posix, ya están dados los permisos de ejecución a los archivos).
+- Para acceder al script de forma global desde cualquier path y sin tener que ejecutar 'python ...' teneis que coger el script que esta en 'scripts/[OS]/kbase-git.[OS]' correspondiente a vuestro systema operativo (windows o posix (mac y linux)), editar el path que hay dentro poniendo la ruta absoluta de donde guardéis el archivo 'kbase-git.py' y ejecutar el instalador correspondiente 'installer.[OS]' (en caso de Posix, ya están dados los permisos de ejecución a los archivos). Tendrés que dar permisos de administrador para que se pueda copiar el script 'kbase-git.[OS]' en una ruta que esté añadida en el PATH del sistema, C:\Windows\System32 (windows) y /usr/local/bin (linux y mac).
 
 Linux y Mac
 ```
