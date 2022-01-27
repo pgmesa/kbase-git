@@ -3,12 +3,12 @@ import sys
 import json
 import platform
 from pathlib import Path
-from subprocess import run, PIPE, CalledProcessError
+from subprocess import run, PIPE
 
 try:
     username = run('keybase whoami', stdout=PIPE, check=True).stdout.decode().strip()
-except CalledProcessError:
-    print("ERROR: You seem to be offline, not logged in to keyabase or not in skin4loud keybase team")
+except:
+    print("ERROR: You seem to be offline, not logged in to keybase or not in skin4loud keybase team")
     exit(1)
     
 mark = "#PATH#"
