@@ -11,7 +11,7 @@ Si se pone ['--config-paths'], en vez de mover o descargar el directorio en el q
 {
     "paths":[
         "C:\\example\\for\\windows\\path",
-        "C:/example/for/posix/path"
+        "/example/for/posix/path"
     ]
 }
 ```

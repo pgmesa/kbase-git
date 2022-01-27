@@ -1,0 +1,7 @@
+
+{
+    "paths":[
+        "C:\\example\\for\\windows\\path",
+        "/example/for/posix/path"
+    ]
+}

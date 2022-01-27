@@ -14,20 +14,27 @@ if require_d1 > int(dig1) or require_d2 > int(dig2):
     exit(1)
 # ---------------------------
 
-# --- User Variables
-# -------------------------
-# Change the user name to the one you use in keybase
-username = 'pgmesa'
-# Change the time the countdown will last (seconds)
+try:
+    username = run("keybase whoami", shell=True, stdout=PIPE).stdout.decode().strip()
+except CalledProcessError:
+    print("[!] Error trying to get keybase username (keybase installed and logged in?)")
+    exit(1)
+    
+kbpath_to_upload = f"/keybase/team/skin4cloud/desarrollo/utils/kbase-git/uploads/{username}"
+
+# Time the countdown will last (seconds)
 counter = 10
 time_to_exit = 5 
-# -------------------------
 
 dir_ = Path(os.getcwd()).resolve()
 execution_path = Path(__file__).resolve().parent
 
-config_fname = 'config.json'
-kbpath_to_upload = f'/keybase/private/{username}'
+config_dir = execution_path/'configs'
+config_example = 'example.json'
+config_fpath = config_dir/f'{username}.json'
+if not os.path.exists(config_fpath):
+    with open(config_fpath, 'wb') as file:
+        json.dump({"paths": []}, file, indent=4)
 
 commands = {
     'upload': "Upload the added files of a git repository to keybase (including .git folder), --config-paths",
@@ -37,23 +44,14 @@ commands = {
 counter_flag = False
 
 def main():
-    global counter, counter_flag
+    global counter_flag
     print(f" -> Cwd: '{dir_}'")
-    print(f" -> Keybase username chosen: '{username}'")
+    print(f" -> Keybase username: '{username}'")
     args = sys.argv; args.pop(0)
     if len(args) > 0:
         command = args[0]
         paths = [dir_]
         if command == 'upload' or command == 'download':
-            print("[%] Iniciando sesión en keybase (ctrl-c para reintentar si se queda pillado)...")
-            print("[%] Puede ser necesario tener que reintentar un par de veces")    
-            print("[%] En ocasiones el cuadro no se muestra en pantalla pero esta abierto en la barra de tareas")
-            print("[%] En caso de que no salga un cuadro de input, reintentar comando o iniciar sesion desde la app de keybase")
-            if not login_intent():
-                print("[!] No se pudo iniciar sesion en KeyBase")
-                return
-            else:
-                print("[%] Sesion iniciada con exito")
             if "--counter" in args:
                 counter_flag = True
             if "--config-paths" in args: 
@@ -84,7 +82,12 @@ def main():
     else: print_help()
 
 # ---------- Utils ----------------
-def login_intent() -> bool:
+def login_intent(show_msg:bool=True) -> bool:
+    if show_msg:
+        print("[%] Iniciando sesión en keybase (ctrl-c para reintentar si se queda pillado)...")
+        print("[%] Puede ser necesario tener que reintentar un par de veces")    
+        print("[%] En ocasiones el cuadro no se muestra en pantalla pero esta abierto en la barra de tareas")
+        print("[%] En caso de que no salga un cuadro de input, reintentar comando o iniciar sesion desde la app de keybase")
     try:
         run('keybase login', check=True, shell=True)
     except CalledProcessError:
@@ -92,12 +95,12 @@ def login_intent() -> bool:
     except KeyboardInterrupt:
         answer = str(input("[%] Reintentar login? (y/n): "))
         if answer.lower() == "y":
-            return login_intent()
+            return login_intent(show_msg=False)
         return False
     return True
     
 def get_config() -> dict:
-    with open(execution_path/config_fname, 'rb') as file:
+    with open(config_fpath, 'rb') as file:
         config = json.load(file)
         return config
 
@@ -195,7 +198,6 @@ if "__main__" == __name__:
         print("--------------------------------------------")
         main()
         print("--------------------------------------------")
-        print("[%] Program finished successfully")
     except KeyboardInterrupt:
         print("[!] Exit")
         exit(1)

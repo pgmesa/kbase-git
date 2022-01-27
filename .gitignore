@@ -1,0 +1,6 @@
+
+tests.py
+/configs/*
+!example.json
+/uploads/*
+!info.txt
