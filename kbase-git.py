@@ -16,7 +16,7 @@ if require_d1 > int(dig1) or require_d2 > int(dig2):
 
 try:
     username = run("keybase whoami", shell=True, stdout=PIPE, check=True).stdout.decode().strip()
-except CalledProcessError:
+except:
     print("[!] Error trying to get keybase username (keybase installed and logged in?)")
     exit(1)
     
