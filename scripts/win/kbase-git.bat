@@ -1,15 +1,15 @@
 @echo off
 
 @REM Comprobamos que el disco esta montado
-if K:\ (
+if exist K: (
     echo ERROR: Keybase K:\ unit is not mounted
-    exit 1 /b
+    exit 1
 )
 
 @REM Comprobamos que tenemos conexion a internet y que tenemos acceso al team Skin4Cloud
 if exist K:\team\skin4cloud (
     echo ERROR: You seem to be offline or not in Skin4Cloud keybase team
-    exit 1 /b
+    exit 1
 )
 
 @REM Vemos el nombre de usuario
