@@ -20,7 +20,7 @@ del result.txt
 keybase fs mkdir /keybase/team/skin4cloud/desarrollo/utils/kbase-git/uploads/%name%
 @REM Creamos el fichero de configuracion base del usuario
 set fname=/keybase/team/skin4cloud/desarrollo/utils/kbase-git/configs/%name%.json
-keybase fs read %fname% > nul
+keybase fs read %fname% 2>&1>nul
 if %errorlevel% NEQ 0 (
     keybase fs cp /keybase/team/skin4cloud/desarrollo/utils/kbase-git/configs/example.json %fname%
 )
