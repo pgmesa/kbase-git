@@ -15,12 +15,12 @@ if require_d1 > int(dig1) or require_d2 > int(dig2):
 # ---------------------------
 
 try:
-    username = run("keybase whoami", shell=True, stdout=PIPE).stdout.decode().strip()
+    username = run("keybase whoami", shell=True, stdout=PIPE, check=True).stdout.decode().strip()
 except CalledProcessError:
     print("[!] Error trying to get keybase username (keybase installed and logged in?)")
     exit(1)
     
-kbpath_to_upload = f"/keybase/team/skin4cloud/desarrollo/utils/kbase-git/uploads/{username}"
+kbpath_to_upload = f"/keybase/team/skin4cloud/kbase-git_uploads/{username}"
 
 # Time the countdown will last (seconds)
 counter = 10
@@ -32,9 +32,6 @@ execution_path = Path(__file__).resolve().parent
 config_dir = execution_path/'configs'
 config_example = 'example.json'
 config_fpath = config_dir/f'{username}.json'
-if not os.path.exists(config_fpath):
-    with open(config_fpath, 'wb') as file:
-        json.dump({"paths": []}, file, indent=4)
 
 commands = {
     'upload': "Upload the added files of a git repository to keybase (including .git folder), --config-paths",

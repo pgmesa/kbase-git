@@ -1,3 +1,5 @@
 #!/bin/bash
 
-python3 /path/to/kbase-git.py $@
+code_path=#PATH#
+
+python3 $code_path/kbase-git.py $@
