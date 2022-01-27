@@ -1,15 +1,13 @@
 @echo off
 
 @REM Comprobamos que el disco esta montado
-cd K:\
-if %errorlevel% NEQ 0 (
+if K:\ (
     echo ERROR: Keybase K:\ unit is not mounted
     exit 1 /b
 )
 
 @REM Comprobamos que tenemos conexion a internet y que tenemos acceso al team Skin4Cloud
-cd K:\team\skin4cloud
-if %errorlevel% NEQ 0 (
+if exist K:\team\skin4cloud (
     echo ERROR: You seem to be offline or not in Skin4Cloud keybase team
     exit 1 /b
 )
