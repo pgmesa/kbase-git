@@ -13,7 +13,9 @@ if NOT exist K:\team\skin4cloud (
 )
 
 @REM Vemos el nombre de usuario
-FOR /F "tokens=*" %a in ('keybase whoami') do SET name=%a
+keybase whoami > result.txt
+set /p name=<result.txt
+del result.txt
 @REM Creamos la carpeta correspondiente al usuario
 keybase fs mkdir /keybase/team/skin4cloud/desarrollo/utils/kbase-git/uploads/%name%
 @REM Creamos el fichero de configuracion base del usuario
