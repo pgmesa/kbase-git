@@ -3,7 +3,7 @@ import csv
 from subprocess import CalledProcessError, Popen, run, PIPE
 
 win_tasks_dir = "KbaseGitTasks"
-task_command = "kbase-git upload --config-paths --counter"
+task_command = "kbase-git upload -g --counter"
 
 def create_task(OS:str, tasks:dict, override=False):
     if override:

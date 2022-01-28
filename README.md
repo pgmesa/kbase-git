@@ -19,11 +19,19 @@ con el fin de que si os roban el ordenador el código fuente que desarrollemos e
 - Para comprobar que esta bien instalado, ejecutad 'kbase-git' desde una terminal de comandos para desplegar la ayuda del programa.
 
 ### Modo de uso
-    - upload ['--config-paths']
-    - download ['--config-paths']
-Si se pone ['--config-paths'], en vez de mover o descargar el directorio en el que os encontreis, subirá/descargará todos los paths a keybase que hayais puesto en el archivo '[nombre usuario].json'
+    - upload: Uploads the .git folder to keybase and removes the project locally, -g for configured paths in .json
+    - download: Downloads the .git folder from keybase and restores the project, -g for configured paths in .json
+    - mktasks: Creates the tasks specified in the <user>.json, -o to override all in windows
+    - shtasks: Shows the created tasks
+    - rmtasks: Removes all tasks created in the system by this program, -f to confirm all in windows
+Si se pone ['-g'], en vez de mover o descargar el directorio en el que os encontreis, subirá/descargará todos los paths a keybase que hayais puesto en el archivo '[nombre usuario].json'
+'[nombre usuario].json':
 ```
 {
+    "tasks":{
+        "lunch_break_upload": "15:15",
+        "night_break_upload": "01:00"
+    },
     "paths":[
         "C:\\example\\for\\windows\\path",
         "/example/for/posix/path"
@@ -32,4 +40,4 @@ Si se pone ['--config-paths'], en vez de mover o descargar el directorio en el q
 ```
 
 ### Añadir Task en el ordenador
-- Para que se ejecute todos los días varias veces de forma automática del script, hay que crear un TASK en el ordenador que ejecute 'kbase-git --config-paths --counter' (ya veremos como poneros el task a cada uno (en Windows es fácil y en MAC o Linux habrá que investigar).
+- Para que se ejecute todos los días varias veces de forma automática del script, hay que crear un TASK en el ordenador que ejecute 'kbase-git -g --counter'. Para ello introducid el comando 'kbase-git mktasks' (se os crearan dos tareas que vienen por defecto). Si quereis cambiar las horas o añadir tasks modificad el '/configs/[user].json' que se os crea en la instalación. 

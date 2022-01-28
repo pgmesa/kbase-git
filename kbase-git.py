@@ -39,11 +39,11 @@ config_example = 'example.json'
 config_fpath = config_dir/f'{username}.json'
 
 commands = {
-    'upload': "Upload the added files of a git repository to keybase (including .git folder), --config-paths",
-    'download': "Downloads the previous files uploaded to the original git repository, --config-paths",
+    'upload': "Uploads the .git folder to keybase and removes the project locally, -g for configured paths in .json",
+    'download': "Downloads the .git folder from keybase and restores the project, -g for configured paths in .json",
     'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows",
     'shtasks': "Shows the created tasks",
-    'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows"  
+    'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
 }
 
 DEBUG = True
@@ -66,7 +66,7 @@ def main():
         if command == 'upload' or command == 'download':
             if "--counter" in args:
                 counter_flag = True
-            if "--config-paths" in args: 
+            if "-g" in args: 
                 paths:list = config['paths']
                 if len(paths) == 0:
                     print("[!] No paths configured to upload/download")
