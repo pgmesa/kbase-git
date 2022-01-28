@@ -155,12 +155,12 @@ def upload(paths:list):
         if check_name(git_path.name):
             print(f" -> [!] '{git_path.name}' folder already exists in '{kbpath_to_upload}'")
             continue
-        run(f'keybase fs mkdir {keybase_path}')
+        run(f'keybase fs mkdir {keybase_path}', shell=True)
         process = run('git rm -rf .', shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
             print(" -> [!] Some errors appeared in the process")
         process = run('git commit -m "Keybase Upload"', shell=True, cwd=git_path, stdout=PIPE)
-        move = run(f"keybase fs mv .git {keybase_path}", cwd=git_path)
+        move = run(f"keybase fs mv .git {keybase_path}", cwd=git_path, shell=True)
         if move.returncode != 0:
             print(" -> [!] Could not move .git folder into keybase")      
         else:
@@ -179,12 +179,12 @@ def download(paths:list):
         git_path = Path(path).resolve()
         keybase_path = kbpath_to_upload+"/"+git_path.name
         
-        move = run(f"keybase fs mv {keybase_path+'/.git'} .", cwd=git_path, stderr=PIPE, stdout=PIPE)
+        move = run(f"keybase fs mv {keybase_path+'/.git'} .", cwd=git_path, stderr=PIPE, stdout=PIPE, shell=True)
         if move.returncode != 0:
             print(f" -> [!] Could not download .git folder, maybe '{git_path.name}' doesn't exist on keybase")
             continue
         else:
-            run(f"keybase fs rm {keybase_path}")
+            run(f"keybase fs rm {keybase_path}", shell=True)
         process = run('git reset --hard HEAD~1', shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
             print(" -> [!] Some errors appeared in the process")      
