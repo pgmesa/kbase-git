@@ -2,9 +2,12 @@
 import os
 import sys
 import json
+import platform
 from time import sleep
 from pathlib import Path
 from subprocess import CalledProcessError, Popen, run, PIPE
+
+import tasks
 
 # -- Python version check ---
 dig1, dig2 = sys.version.split('.')[:2]
@@ -13,6 +16,8 @@ if require_d1 > int(dig1) or require_d2 > int(dig2):
     print("[!] ERROR: The python version must be 3.7 or higher")
     exit(1)
 # ---------------------------
+
+OS = platform.system()
 
 try:
     username = run("keybase whoami", shell=True, stdout=PIPE, check=True).stdout.decode().strip()
@@ -36,18 +41,25 @@ config_fpath = config_dir/f'{username}.json'
 commands = {
     'upload': "Upload the added files of a git repository to keybase (including .git folder), --config-paths",
     'download': "Downloads the previous files uploaded to the original git repository, --config-paths",
-    '--set-tasks': "Creates the tasks specified in the <user>.json",
-    '--show-tasks': "Shows the created tasks",
-    '--rm-tasks': "Removes all tasks created by this program"  
+    'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows",
+    'shtasks': "Shows the created tasks",
+    'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows"  
 }
 
+DEBUG = True
 counter_flag = False
 
 def main():
     global counter_flag
+    print(f" -> System: '{OS}'")
     print(f" -> Cwd: '{dir_}'")
     print(f" -> Keybase username: '{username}'")
     args = sys.argv; args.pop(0)
+    try:
+        config = get_config()
+    except Exception as err:
+        print(f"[!] Configuration failed '{username}.json': \n{err}")
+        return
     if len(args) > 0:
         command = args[0]
         paths = [dir_]
@@ -55,7 +67,7 @@ def main():
             if "--counter" in args:
                 counter_flag = True
             if "--config-paths" in args: 
-                paths:list = get_config()['paths']
+                paths:list = config['paths']
                 if len(paths) == 0:
                     print("[!] No paths configured to upload/download")
                     return
@@ -76,6 +88,19 @@ def main():
                 upload(paths=paths)
             elif command == 'download':
                 download(paths=paths)
+        elif command == 'mktasks':
+            override = False
+            if '-o' in args:
+                override = True
+            configured_tasks = config["tasks"]
+            tasks.create_task(OS, configured_tasks, override=override)
+        elif command == 'shtasks':
+            tasks.show_tasks(OS=OS)
+        elif command == 'rmtasks':  
+            force = False
+            if '-f' in args:
+                force = True 
+            tasks.remove_tasks(OS=OS, force=force)
         else:
             print(f"[!] '{command}' is not a valid command!") 
             print_help()
@@ -89,7 +114,7 @@ def login_intent(show_msg:bool=True) -> bool:
         print("[%] En ocasiones el cuadro no se muestra en pantalla pero esta abierto en la barra de tareas")
         print("[%] En caso de que no salga un cuadro de input, reintentar comando o iniciar sesion desde la app de keybase")
     try:
-        run('keybase login', check=True, shell=True)
+        Popen('keybase login', check=True, shell=True).wait()
     except CalledProcessError:
         return False
     except KeyboardInterrupt:
@@ -201,10 +226,11 @@ if "__main__" == __name__:
     except KeyboardInterrupt:
         print("[!] Exit")
         exit(1)
-    except Exception as err:
-        print(f"[!] Unexpected Error: {err}")
-        input("-> Press Enter to exit")
-        exit(1)
+    # except Exception as err:
+    #     if DEBUG: print(err.with_traceback())
+    #     print(f"[!] Unexpected Error: {err}")
+    #     input("-> Press Enter to exit")
+    #     exit(1)
     if counter_flag:
         print(f"[%] Program will exit in {time_to_exit} seconds:")
         init_counter(time_to_exit)

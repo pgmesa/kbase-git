@@ -1,7 +1,8 @@
+
 {
     "tasks":{
-        "lunch_break_upload": "15:45",
-        "night_break_upload": "1:00"
+        "lunch_break_upload": "15:15",
+        "night_break_upload": "01:00"
     },
     "paths":[
         "C:\\example\\for\\windows\\path",

@@ -25,7 +25,7 @@ def check():
     config_path = main_path/f'configs/{username}.json'
     if not os.path.exists(config_path):
         with open(config_path, 'w') as file:
-            json.dump({"paths":[]}, file, indent=4)
+            file.write(json_model)
     run(f"keybase fs mkdir {kb_dest_dir}", shell=True)
 
 def do(action=None):
@@ -36,6 +36,18 @@ def do(action=None):
             file.write(content.replace(mark, str(main_path)))
         elif action == '--reset':
             file.write(content.replace(str(main_path), mark))
+            
+json_model = """
+{
+    "tasks":{
+        "lunch_break_upload": "15:15",
+        "night_break_upload": "01:00"
+    },
+    "paths":[
+        
+    ]
+}
+"""
 
 if __name__ == "__main__":
     args = sys.argv; args.pop(0)
@@ -46,3 +58,4 @@ if __name__ == "__main__":
             do(action=action)
         elif '--reset' == action:
             do(action=action)
+            
