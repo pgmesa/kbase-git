@@ -26,7 +26,7 @@ def check():
     if not os.path.exists(config_path):
         with open(config_path, 'w') as file:
             json.dump({"paths":[]}, file, indent=4)
-    run(f"keybase fs mkdir {kb_dest_dir}")
+    run(f"keybase fs mkdir {kb_dest_dir}", shell=True)
 
 def do(action=None):
     with open(shell_fpath, 'r') as file:
