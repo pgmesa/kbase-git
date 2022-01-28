@@ -2,3 +2,4 @@
 tests.py
 /configs/*
 !example.json
+tasks.py

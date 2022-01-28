@@ -36,6 +36,9 @@ config_fpath = config_dir/f'{username}.json'
 commands = {
     'upload': "Upload the added files of a git repository to keybase (including .git folder), --config-paths",
     'download': "Downloads the previous files uploaded to the original git repository, --config-paths",
+    '--set-tasks': "Creates the tasks specified in the <user>.json",
+    '--show-tasks': "Shows the created tasks",
+    '--rm-tasks': "Removes all tasks created by this program"  
 }
 
 counter_flag = False
