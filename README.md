@@ -15,7 +15,7 @@ con el fin de que si os roban el ordenador el código fuente que desarrollemos e
 
 ### Intalar de forma Global 
 - Para acceder al script de forma global desde cualquier path y sin tener que ejecutar 'python ...' teneis que ejecutar el instalador correspondiente a vuestro sistema operativo -> 'scripts/[win o posix]/installer[.bat o .sh]' (posix = mac y linux) (en caso de posix, ya están dados los permisos de ejecución a los archivos). El script os pedirá permisos de administrador para que se pueda copiar el script 'kbase-git.[OS]' en una ruta que esté añadida en el PATH del sistema por defecto, 'C:\Windows\System32' (windows) y '/usr/local/bin' (linux y mac).
-- En la instalación se os creará un archivo en 'configs/[vuestro username de keybase].json' donde podréis poner los paths que quereis que se os suban directamente a keybase (mirar 'example.json'). También se os creará una carpeta para personal con vuestro nombre de usuario automáticamente en keybase dentro de ''
+- En la instalación se os creará un archivo en 'configs/[vuestro username de keybase].json' donde podréis poner los paths que quereis que se os suban directamente a keybase (mirar 'example.json'). También se os creará una carpeta personal con vuestro nombre de usuario automáticamente en keybase dentro de '/keybase/team/skin4cloud/kbase-git_uploads'
 - Para comprobar que esta bien instalado, ejecutad 'kbase-git' desde una terminal de comandos para desplegar la ayuda del programa.
 
 ### Modo de uso
