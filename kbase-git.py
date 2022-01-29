@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import platform
+import traceback
 from time import sleep
 from pathlib import Path
 from subprocess import CalledProcessError, Popen, run, PIPE
@@ -74,13 +75,17 @@ def main():
     logger.info(f"Cwd: '{dir_}'")
     logger.info(f"Execution Path: {execution_path}")
     logger.info(f"Keybase username: '{username}'")
+    if DEBUG:
+        logger.info(f"DEBUG Mode Activated")
     args = sys.argv; args.pop(0)
-    logger.info(f"args: {args}")
+    logger.info(f"args => {args}", sysout=False)
     try:
         config = get_config()
     except Exception as err:
         logger.error(f"Configuration failed '{username}.json': \n{err}")
         return
+    if "-h" in args:
+        print_help()
     if len(args) > 0:
         command = args[0]
         paths = [dir_]
@@ -103,7 +108,7 @@ def main():
                         return
                     if counter_flag:
                         msg1 = f"your configured paths will be uploaded to keybase in {counter} seconds"
-                        logger.error(f"Countdown activated, {msg1} (press ctrl-c to cancel)")
+                        logger.info(f"Countdown activated, {msg1} (press ctrl-c to cancel)")
                         init_counter(counter)
             if command == 'upload':
                 upload(paths=paths)
@@ -125,7 +130,8 @@ def main():
         else:
             logger.error(f"'{command}' is not a valid command!") 
             print_help()
-    else: print_help()
+    else: 
+        print_help()
 
 # ---------- Utils ----------------
 def login_intent(show_msg:bool=True) -> bool:
@@ -154,6 +160,7 @@ def process_listed_stdout(out:str) -> list:
     return list(filter(lambda path: path != "", out.split('\n')))
         
 def print_help():
+    logger.log("Printing Help", sysout=False)
     print("[?] Commands:")
     for command, info in commands.items():
         print(f"     - {command}: {info}")
@@ -185,7 +192,8 @@ def upload(paths:list):
             logger.error(f"'{path}' doesn't exist (ignoring)")
             continue
         logger.info(f"Uploading '{path}'...")
-        process = run('git ls-files', shell=True, cwd=path, stdout=PIPE)
+        cmd = 'git ls-files'; logger.log(cmd, sysout=False)
+        process = run(cmd, shell=True, cwd=path, stdout=PIPE)
         if process.returncode != 0:
             logger.error("Upload failed, 'git ls-files' command failed (git not installed or not a git repo)")
             continue
@@ -202,11 +210,14 @@ def upload(paths:list):
             logger.error(f"'{git_path.name}' folder already exists in '{kbpath_to_upload}'")
             continue
         run(f'keybase fs mkdir {keybase_path}', shell=True)
-        process = run('git rm -rf .', shell=True, cwd=git_path, stdout=PIPE)
+        cmd = 'git rm -rf .'; logger.log(cmd, sysout=False)
+        process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
             logger.error("Some errors appeared in the process")
-        process = run('git commit -m "Keybase Upload"', shell=True, cwd=git_path, stdout=PIPE)
-        move = run(f"keybase fs mv .git {keybase_path}", cwd=git_path, shell=True)
+        cmd = 'git commit -m "Keybase Upload"'; logger.log(cmd, sysout=False)
+        run(cmd, shell=True, cwd=git_path, stdout=PIPE)
+        cmd = f"keybase fs mv .git {keybase_path}"; logger.log(cmd, sysout=False)
+        move = run(cmd, cwd=git_path, shell=True)
         if move.returncode != 0:
             logger.error("Could not move .git folder into keybase")      
         else:
@@ -224,14 +235,16 @@ def download(paths:list):
         # Movemos el .git de keybase a su carpeta original y restauramos los archivos
         git_path = Path(path).resolve()
         keybase_path = kbpath_to_upload+"/"+git_path.name
-        
-        move = run(f"keybase fs mv {keybase_path+'/.git'} .", cwd=git_path, stderr=PIPE, stdout=PIPE, shell=True)
+        cmd =f"keybase fs mv {keybase_path+'/.git'} ."; logger.log(cmd, sysout=False)
+        move = run(cmd, cwd=git_path, stderr=PIPE, stdout=PIPE, shell=True)
         if move.returncode != 0:
             logger.error(f"Could not download .git folder, maybe '{git_path.name}' doesn't exist on keybase")
             continue
         else:
-            run(f"keybase fs rm {keybase_path}", shell=True)
-        process = run('git reset --hard HEAD~1', shell=True, cwd=git_path, stdout=PIPE)
+            cmd = f"keybase fs rm {keybase_path}"; logger.log(cmd, sysout=False)
+            run(cmd, shell=True)
+        cmd ='git reset --hard HEAD~1'; logger.log(cmd, sysout=False)
+        process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
             logger.error("Some errors appeared in the process")      
         else:
@@ -246,16 +259,20 @@ if "__main__" == __name__:
         main()
         print("--------------------------------------------")
     except KeyboardInterrupt:
-        logger.error("Exit")
+        logger.warning("Exit (ctrl-c)")
         error = True
     except Exception as err:
-        if DEBUG: print(err.with_traceback())
-        logger.error(f"Unexpected Error: {err}")
-        input("-> Press Enter to exit")
+        sysout = False
+        if DEBUG: sysout = True
+        logger.critical(traceback.format_exc(), sysout=sysout)
+        if not DEBUG:
+            logger.critical(f"Unexpected Error: {err}")
         error = True
     finally:
         logging.flush()
     if counter_flag:
         print(f"[%] Program will exit in {time_to_exit} seconds:")
         init_counter(time_to_exit)
-    if error: exit(1)
+    if error: 
+        input("-> Press Enter to exit")
+        exit(1)

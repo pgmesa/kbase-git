@@ -81,45 +81,46 @@ class Logger():
     def free_logs(self):
         self.capture_logs = False
      
-    def debug(self, msg:str, nl:bool=False):
+    def debug(self, msg:str, nl:bool=False, sysout:bool=True):
         _level = DEBUG; symbol = '[DEBUG]'
         if self._check_level(_level):
-            self._process(msg, symbol=symbol, nl=nl)
+            self._process(msg, symbol=symbol, nl=nl, sysout=sysout)
     
-    def info(self, msg:str,nl:bool=False):
+    def info(self, msg:str,nl:bool=False, sysout:bool=True):
         _level = INFO; symbol = '[INFO]'
         if self._check_level(_level):
-            self._process(msg, symbol=symbol, nl=nl)
+            self._process(msg, symbol=symbol, nl=nl, sysout=sysout)
     
-    def warning(self, msg:str, nl:bool=False):
+    def warning(self, msg:str, nl:bool=False, sysout:bool=True):
         _level = WARNING; symbol = '[WARNING]'
         if self._check_level(_level):
-            self._process(msg, symbol=symbol, nl=nl)  
+            self._process(msg, symbol=symbol, nl=nl, sysout=sysout)  
         
-    def error(self, msg:str, nl:bool=False):
+    def error(self, msg:str, nl:bool=False, sysout:bool=True):
         _level = ERROR; symbol = '[ERROR]'
         if self._check_level(_level):
-            self._process(msg, symbol=symbol, nl=nl)
+            self._process(msg, symbol=symbol, nl=nl, sysout=sysout)
     
-    def critical(self, msg:str, nl:bool=False):
+    def critical(self, msg:str, nl:bool=False, sysout:bool=True):
         _level = CRITICAL; symbol = '[CRITICAl]'
         if self._check_level(_level):
-            self._process(msg, symbol=symbol, nl=nl)
+            self._process(msg, symbol=symbol, nl=nl, sysout=sysout)
     
-    def log(self, msg:str, nl:bool=False):
+    def log(self, msg:str, nl:bool=False, sysout:bool=True):
         symbol = '[LOG]'
-        self._process(msg, symbol=symbol, nl=nl)
+        self._process(msg, symbol=symbol, nl=nl, sysout=sysout)
             
     def _check_level(self, level:int):
         if not root_level > level and not self.level > level:
             return True
         return False
     
-    def _process(self, msg:str, symbol:str='', nl:bool=False):
+    def _process(self, msg:str, symbol:str='', nl:bool=False, sysout:bool=True):
         log = self._get_log(msg, symbol=symbol, nl=nl)
         self._capture(log)
-        log = self._get_log(msg, symbol=symbol, nl=nl, showfn=self.show_fname)
-        self._print(log)
+        if sysout:
+            log = self._get_log(msg, symbol=symbol, nl=nl, showfn=self.show_fname)
+            self._print(log)
     
     def _get_log(self, msg:str, symbol:str='', nl:bool=False, showfn=True) -> str:
         log = symbol+" "

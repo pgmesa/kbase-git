@@ -1,6 +1,7 @@
 
 import os
 import csv
+from sys import stdout
 import kb_logging as logging
 from pathlib import Path
 from subprocess import CalledProcessError, Popen, run, PIPE
@@ -26,13 +27,21 @@ def create_task(OS:str, tasks:dict, override=False):
                 continue
             cmd = (f'SCHTASKS /CREATE /SC DAILY /TN "{win_tasks_dir}\\{task_name}" ' +
                     f'/TR "{task_command}" /ST {time}')
-            Popen(cmd, shell=True).wait()
+            logger.log(cmd, sysout=False)
+            logger.info(f"Creating '{task_name}' at '{time}'")
+            p = Popen(cmd, shell=True, stderr=PIPE)
+            p.wait()
+            if p.returncode != 0:
+                logger.warning("Operation Cancelled", sysout=False)
+            else:
+                logger.info("Task created successfully", sysout=False)
     else:
         extasks = get_tasks(OS)
         if len(extasks) != 0:
             show_tasks(OS)
             answer = str(input("WARNING: There are already tasks scheduled on crontab. Override? (y/n): "))
             if answer.lower() != 'y':
+                logger.warning("Operation Cancelled")
                 return
         cronfile = ""
         for task_name, time in tasks.items():
@@ -46,40 +55,60 @@ def create_task(OS:str, tasks:dict, override=False):
             hours = int(time[:2]); mins = int(time[3:])
             cron_task = f"{mins} {hours} * * * {task_command}"
             cronfile += f"# {task_name}\n{cron_task}\n"
+            logger.info(f"Adding '{task_name}': '{cron_task}'")
         if cronfile != "":
             cron_fpath = execution_path/'tempsh'
             with open(cron_fpath, 'w') as file:
                 file.write(cronfile)
-            run(f'crontab {cron_fpath}', shell=True)
+            cmd = f'crontab {cron_fpath}'; logger.log(cmd, sysout=False)
+            p = run(cmd, shell=True)
+            if p.returncode == 0:
+                logger.info("Tasks created successfully")
+            else:
+                logger.error("Error while saving tasks in crontab")
             os.remove(cron_fpath)
         
 def show_tasks(OS:str):
-    print(" + Scheduled Tasks:")
+    logger.info(" + Scheduled Tasks:")
     tasks = get_tasks(OS)
     if len(tasks) == 0:
-        logger.info(" [%] No tasks scheduled")
+        logger.info("No tasks scheduled")
         return
     if OS == "Windows":
         cmd = f"schtasks /query /fo TABLE /tn {win_tasks_dir}\\"
-        run(cmd, shell=True, check=True, stderr=PIPE)
+        logger.log(cmd, sysout=False)
+        out = run(cmd, shell=True, check=True, stderr=PIPE, stdout=PIPE).stdout.decode()[:-2]
+        logger.log(out)
     else:
-        for task in tasks: print("     ->", task)
+        for task in tasks: logger.log("     ->", task)
     
 def remove_tasks(OS:str, force=False):
     tasks = get_tasks(OS)
     if len(tasks) == 0:
-        logger.info(" [%] No tasks to remove")
+        logger.info("No tasks to remove")
         return
     f = ""
     if force: f = "/F"
+    show_tasks(OS)
     if OS == "Windows":
         for task in tasks:
             logger.info(f"Deleting '{task}'...")
             cmd = (f'SCHTASKS /DELETE /TN "{task}" {f}')
-            Popen(cmd, shell=True).wait()
+            logger.log(cmd, sysout=False)
+            p = Popen(cmd, shell=True); p.wait()
+            extasks = get_tasks(OS)
+            if task in extasks:
+                logger.warning("Operation Cancelled",sysout=False)
+            else:
+                logger.info("Task deleted successfully",sysout=False)
     else:
-        run('crontab -r', shell=True, stdout=PIPE, stderr=PIPE)
-        logger.info("[%] Tasks removed")
+        cmd = 'crontab -r'
+        logger.log(cmd, sysout=False)
+        p = run(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+        if p.returncode == 0:
+            logger.info("Tasks removed successfully")
+        else:
+            logger.error("Error while removing crontab-file")
         
 def get_tasks(OS:str) -> list:
     tasks = []
