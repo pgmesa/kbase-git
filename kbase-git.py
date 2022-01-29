@@ -66,11 +66,13 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
+VERSION = 0.1
 DEBUG = True
 counter_flag = False
 
 def main():
     global counter_flag
+    logger.info(f"Program Version: {VERSION}")
     logger.info(f"System: '{OS}'")
     logger.info(f"Cwd: '{dir_}'")
     logger.info(f"Execution Path: {execution_path}")
