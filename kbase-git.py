@@ -1,5 +1,6 @@
 
 import os
+from re import T
 import sys
 import json
 import platform
@@ -66,8 +67,8 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.1
-DEBUG = True
+VERSION = 0.2
+DEBUG = False
 counter_flag = False
 
 def main():
@@ -216,6 +217,8 @@ def upload(paths:list):
         process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
             logger.error("Some errors appeared in the process")
+        run(f'git config user.name "{username}"', shell=True, cwd=git_path)
+        run('git config user.email "<>"', shell=True, cwd=git_path)
         cmd = 'git commit -m "Keybase Upload"'; logger.log(cmd, sysout=False)
         run(cmd, shell=True, cwd=git_path, stdout=PIPE)
         cmd = f"keybase fs mv .git {keybase_path}"; logger.log(cmd, sysout=False)
