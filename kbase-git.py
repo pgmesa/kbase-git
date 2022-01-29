@@ -8,6 +8,7 @@ from pathlib import Path
 from subprocess import CalledProcessError, Popen, run, PIPE
 
 import tasks
+import kb_logging as logging
 
 # -- Python version check ---
 dig1, dig2 = sys.version.split('.')[:2]
@@ -46,19 +47,39 @@ commands = {
     'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
 }
 
+print("Initializing program...")
+# -- Global logger config
+title = f"{username}"; title_end = ""
+try:
+    if sys.argv[1] in commands:
+        title_end += "_"+sys.argv[1]
+except: pass
+if '-a' in sys.argv:
+    title_end += "_auto"
+logs_dir = kbpath_to_upload+f"/__logs__"
+run(f'keybase fs mkdir {logs_dir}', shell=True)
+logging.config_log_capture(logs_dir, logfile_title=title, title_end=title_end)
+logging.root_level = logging.DEBUG
+logging.start_log_capture()
+# -- Logger
+logger = logging.Logger(module_name=__name__, show_fname=False)
+logger.level = logging.DEBUG
+
 DEBUG = True
 counter_flag = False
 
 def main():
     global counter_flag
-    print(f" -> System: '{OS}'")
-    print(f" -> Cwd: '{dir_}'")
-    print(f" -> Keybase username: '{username}'")
+    logger.info(f"System: '{OS}'")
+    logger.info(f"Cwd: '{dir_}'")
+    logger.info(f"Execution Path: {execution_path}")
+    logger.info(f"Keybase username: '{username}'")
     args = sys.argv; args.pop(0)
+    logger.info(f"args: {args}")
     try:
         config = get_config()
     except Exception as err:
-        print(f"[!] Configuration failed '{username}.json': \n{err}")
+        logger.error(f"Configuration failed '{username}.json': \n{err}")
         return
     if len(args) > 0:
         command = args[0]
@@ -69,20 +90,20 @@ def main():
             if "-g" in args: 
                 paths:list = config['paths']
                 if len(paths) == 0:
-                    print("[!] No paths configured to upload/download")
+                    logger.error("No paths configured to upload/download")
                     return
-                print("[%] Configured paths:")
-                for path in paths: print(f" -> {path}")
+                logger.info("Configured paths:")
+                for path in paths: logger.info(f" -> {path}")
                 if command == 'upload':
                     for path in paths:
                         if not check_name(Path(path).name):
                             break
                     else:
-                        print("[%] Everything seems already uploaded")
+                        logger.info("Everything seems already uploaded")
                         return
                     if counter_flag:
                         msg1 = f"your configured paths will be uploaded to keybase in {counter} seconds"
-                        print(f"[!] Countdown activated, {msg1} (press ctrl-c to cancel)")
+                        logger.error(f"Countdown activated, {msg1} (press ctrl-c to cancel)")
                         init_counter(counter)
             if command == 'upload':
                 upload(paths=paths)
@@ -102,7 +123,7 @@ def main():
                 force = True 
             tasks.remove_tasks(OS=OS, force=force)
         else:
-            print(f"[!] '{command}' is not a valid command!") 
+            logger.error(f"'{command}' is not a valid command!") 
             print_help()
     else: print_help()
 
@@ -156,67 +177,68 @@ def init_counter(seconds:int):
 
 # ------------ Commands --------------
 def upload(paths:list):
-    print("[%] Uploading paths...")  
+    logger.info("Uploading paths...")  
     for path in paths:
         if type(path) != Path:
             path = Path(path).resolve()
         if not os.path.exists(path):
-            print(f"[!] '{path}' doesn't exist (ignoring)")
+            logger.error(f"'{path}' doesn't exist (ignoring)")
             continue
-        print(f"[%] Uploading '{path}'...")
+        logger.info(f"Uploading '{path}'...")
         process = run('git ls-files', shell=True, cwd=path, stdout=PIPE)
         if process.returncode != 0:
-            print(" -> [!] Upload failed, 'git ls-files' command failed (git not installed or not a git repo)")
+            logger.error("Upload failed, 'git ls-files' command failed (git not installed or not a git repo)")
             continue
         out = process.stdout.decode()
         paths_to_upload:list = process_listed_stdout(out)
         if len(paths_to_upload) == 0:
-            print(" -> [!] This directory has no files added to git")
+            logger.error("This directory has no files added to git")
             continue
         # Eliminamos archivos y movemos el .git a keybase
         git_path = Path(path).resolve()
         keybase_path = kbpath_to_upload+"/"+git_path.name
         # Vemos si el nombre ya existe en keybase
         if check_name(git_path.name):
-            print(f" -> [!] '{git_path.name}' folder already exists in '{kbpath_to_upload}'")
+            logger.error(f"'{git_path.name}' folder already exists in '{kbpath_to_upload}'")
             continue
         run(f'keybase fs mkdir {keybase_path}', shell=True)
         process = run('git rm -rf .', shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
-            print(" -> [!] Some errors appeared in the process")
+            logger.error("Some errors appeared in the process")
         process = run('git commit -m "Keybase Upload"', shell=True, cwd=git_path, stdout=PIPE)
         move = run(f"keybase fs mv .git {keybase_path}", cwd=git_path, shell=True)
         if move.returncode != 0:
-            print(" -> [!] Could not move .git folder into keybase")      
+            logger.error("Could not move .git folder into keybase")      
         else:
-            print(" -> [%] Folder uploaded successfully")
+            logger.info("Folder uploaded successfully")
     
 def download(paths:list):
-    print("[%] Downloading paths...")  
+    logger.info("Downloading paths...")  
     for path in paths:
         if type(path) != Path:
             path = Path(path).resolve()
         if not os.path.exists(path):
-            print(f"[!] '{path}' doesn't exist (ignoring)")
+            logger.error(f"'{path}' doesn't exist (ignoring)")
             continue
-        print(f"[%] Downloading '{path}'...")
+        logger.info(f"Downloading '{path}'...")
         # Movemos el .git de keybase a su carpeta original y restauramos los archivos
         git_path = Path(path).resolve()
         keybase_path = kbpath_to_upload+"/"+git_path.name
         
         move = run(f"keybase fs mv {keybase_path+'/.git'} .", cwd=git_path, stderr=PIPE, stdout=PIPE, shell=True)
         if move.returncode != 0:
-            print(f" -> [!] Could not download .git folder, maybe '{git_path.name}' doesn't exist on keybase")
+            logger.error(f"Could not download .git folder, maybe '{git_path.name}' doesn't exist on keybase")
             continue
         else:
             run(f"keybase fs rm {keybase_path}", shell=True)
         process = run('git reset --hard HEAD~1', shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
-            print(" -> [!] Some errors appeared in the process")      
+            logger.error("Some errors appeared in the process")      
         else:
-            print(" -> [%] Folder restored successfully")  
+            logger.info("Folder restored successfully")  
 
 if "__main__" == __name__:
+    error = False
     try:
         print("[%] Program started (ctrl-c to exit)")
         print("----------- KeyBase-git Uploader -----------")
@@ -224,13 +246,16 @@ if "__main__" == __name__:
         main()
         print("--------------------------------------------")
     except KeyboardInterrupt:
-        print("[!] Exit")
-        exit(1)
-    # except Exception as err:
-    #     if DEBUG: print(err.with_traceback())
-    #     print(f"[!] Unexpected Error: {err}")
-    #     input("-> Press Enter to exit")
-    #     exit(1)
+        logger.error("Exit")
+        error = True
+    except Exception as err:
+        if DEBUG: print(err.with_traceback())
+        logger.error(f"Unexpected Error: {err}")
+        input("-> Press Enter to exit")
+        error = True
+    finally:
+        logging.flush()
     if counter_flag:
         print(f"[%] Program will exit in {time_to_exit} seconds:")
         init_counter(time_to_exit)
+    if error: exit(1)

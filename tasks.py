@@ -1,12 +1,16 @@
 
 import os
 import csv
+import kb_logging as logging
 from pathlib import Path
 from subprocess import CalledProcessError, Popen, run, PIPE
 
 win_tasks_dir = "KbaseGitTasks"
-task_command = "kbase-git upload -g --counter"
+task_command = "kbase-git upload -g --counter -a"
 execution_path = Path(__file__).resolve().parent
+# -- Logger
+logger = logging.Logger(module_name=__name__, show_fname=False)
+logger.level = logging.DEBUG
 
 def create_task(OS:str, tasks:dict, override=False):
     if override:
@@ -16,9 +20,9 @@ def create_task(OS:str, tasks:dict, override=False):
             try:
                 check_input_time(time)
             except Exception as err:
-                msg = (f" El tiempo introducido '{time}' no es correcto" + 
+                msg = (f"El tiempo introducido '{time}' no es correcto" + 
                         f"\n     ERR MSG -> {err}")
-                print(msg)
+                logger.error(msg)
                 continue
             cmd = (f'SCHTASKS /CREATE /SC DAILY /TN "{win_tasks_dir}\\{task_name}" ' +
                     f'/TR "{task_command}" /ST {time}')
@@ -37,7 +41,7 @@ def create_task(OS:str, tasks:dict, override=False):
             except Exception as err:
                 msg = (f" El tiempo introducido '{time}' no es correcto" + 
                         f"\n     ERR MSG -> {err}")
-                print(msg)
+                logger.error(msg)
                 continue
             hours = int(time[:2]); mins = int(time[3:])
             cron_task = f"{mins} {hours} * * * {task_command}"
@@ -53,7 +57,7 @@ def show_tasks(OS:str):
     print(" + Scheduled Tasks:")
     tasks = get_tasks(OS)
     if len(tasks) == 0:
-        print(" [%] No tasks scheduled")
+        logger.info(" [%] No tasks scheduled")
         return
     if OS == "Windows":
         cmd = f"schtasks /query /fo TABLE /tn {win_tasks_dir}\\"
@@ -64,17 +68,18 @@ def show_tasks(OS:str):
 def remove_tasks(OS:str, force=False):
     tasks = get_tasks(OS)
     if len(tasks) == 0:
-        print(" [%] No tasks to remove")
+        logger.info(" [%] No tasks to remove")
         return
     f = ""
     if force: f = "/F"
     if OS == "Windows":
         for task in tasks:
+            logger.info(f"Deleting '{task}'...")
             cmd = (f'SCHTASKS /DELETE /TN "{task}" {f}')
             Popen(cmd, shell=True).wait()
     else:
         run('crontab -r', shell=True, stdout=PIPE, stderr=PIPE)
-        print("[%] Tasks removed")
+        logger.info("[%] Tasks removed")
         
 def get_tasks(OS:str) -> list:
     tasks = []
