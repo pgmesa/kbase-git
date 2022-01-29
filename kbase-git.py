@@ -1,6 +1,5 @@
 
 import os
-from re import T
 import sys
 import json
 import platform

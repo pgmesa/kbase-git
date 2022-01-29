@@ -1,7 +1,6 @@
 
 import os
 import csv
-from sys import stdout
 import kb_logging as logging
 from pathlib import Path
 from subprocess import CalledProcessError, Popen, run, PIPE

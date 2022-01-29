@@ -1,9 +1,8 @@
 
-import os
 import calendar
 import datetime as dt
 from pathlib import Path
-from subprocess import CalledProcessError, Popen, run, PIPE
+from subprocess import run, PIPE
 
 DEBUG = 0
 INFO = 10
