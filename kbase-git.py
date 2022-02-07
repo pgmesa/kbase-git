@@ -19,6 +19,8 @@ if require_d1 > int(dig1) or require_d2 > int(dig2):
     print("[!] ERROR: The python version must be 3.7 or higher")
     exit(1)
 # ---------------------------
+# run("git status main")
+# if 
 
 OS = platform.system()
 
@@ -48,6 +50,7 @@ commands = {
     'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows, -u to execute when logged into this user only",
     'shtasks': "Shows the created tasks",
     'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
+    'update': ""
 }
 
 def is_admin():
