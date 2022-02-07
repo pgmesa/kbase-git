@@ -2,4 +2,7 @@
 
 code_path=#PATH#
 
-python3 $code_path/kbase-git.py $@
+echo Searching for updates...
+git -C "$code_path" pull origin main
+
+python3 "$code_path/kbase-git.py" $@
