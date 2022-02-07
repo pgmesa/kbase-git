@@ -25,7 +25,7 @@ def create_task(OS:str, tasks:dict, override=False):
                 logger.error(msg)
                 continue
             cmd = (f'SCHTASKS /CREATE /SC DAILY /TN "{win_tasks_dir}\\{task_name}" ' +
-                    f'/TR "{task_command}" /ST {time}')
+                    f'/TR "{task_command}" /ST {time}') # /RU SYSTEM
             logger.log(cmd, sysout=False)
             logger.info(f"Creating '{task_name}' at '{time}'")
             p = Popen(cmd, shell=True, stderr=PIPE)
@@ -59,7 +59,7 @@ def create_task(OS:str, tasks:dict, override=False):
             cron_fpath = execution_path/'tempsh'
             with open(cron_fpath, 'w') as file:
                 file.write(cronfile)
-            cmd = f'crontab {cron_fpath}'; logger.log(cmd, sysout=False)
+            cmd = f'crontab "{cron_fpath}"'; logger.log(cmd, sysout=False)
             p = run(cmd, shell=True)
             if p.returncode == 0:
                 logger.info("Tasks created successfully")
@@ -74,7 +74,7 @@ def show_tasks(OS:str):
         logger.info("No tasks scheduled")
         return
     if OS == "Windows":
-        cmd = f"schtasks /query /fo TABLE /tn {win_tasks_dir}\\"
+        cmd = f'schtasks /query /fo TABLE /tn "{win_tasks_dir}\\\\"'
         logger.log(cmd, sysout=False)
         out = run(cmd, shell=True, check=True, stderr=PIPE, stdout=PIPE).stdout.decode()[:-2]
         logger.log(out)
@@ -112,7 +112,7 @@ def remove_tasks(OS:str, force=False):
 def get_tasks(OS:str) -> list:
     tasks = []
     if OS == 'Windows':
-        cmd = f"schtasks /query /fo CSV /tn {win_tasks_dir}\\"
+        cmd = f'schtasks /query /fo CSV /tn "{win_tasks_dir}\\\\"'
         str_csv = run(cmd, shell=True, stdout=PIPE, stderr=PIPE).stdout.decode()
         reader = csv.reader(str_csv.splitlines(), delimiter=',')
         for i, row in enumerate(reader):

@@ -39,6 +39,7 @@ execution_path = Path(__file__).resolve().parent
 config_dir = execution_path/'configs'
 config_example = 'example.json'
 config_fpath = config_dir/f'{username}.json'
+nstaged_name = "__not-staged__"
 
 commands = {
     'upload': "Uploads the .git folder to keybase and removes the project locally, -g for configured paths in .json",
@@ -66,7 +67,7 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.2
+VERSION = 0.3
 DEBUG = False
 counter_flag = False
 
@@ -100,7 +101,7 @@ def main():
                     logger.error("No paths configured to upload/download")
                     return
                 logger.info("Configured paths:")
-                for path in paths: logger.info(f" -> {path}")
+                for path in paths: logger.info(f" -> '{path}'")
                 if command == 'upload':
                     for path in paths:
                         if not check_name(Path(path).name):
@@ -160,6 +161,12 @@ def get_config() -> dict:
 
 def process_listed_stdout(out:str) -> list:
     return list(filter(lambda path: path != "", out.split('\n')))
+
+def get_no_staged_files(git_path) -> list:
+    symbols = ["A", "M", ""]
+    out = run('git status --porcelain', shell=True, cwd=git_path, stdout=PIPE).stdout.decode()
+    not_staged = filter(lambda line: line[0] not in symbols, out.splitlines())
+    return list(map(lambda line: line.strip().split(" ")[1], not_staged))
         
 def print_help():
     logger.log("Printing Help", sysout=False)
@@ -168,7 +175,7 @@ def print_help():
         print(f"     - {command}: {info}")
 
 def check_name(dirname:str) -> bool:
-    process = run(f'keybase fs ls {kbpath_to_upload} --one', shell=True, stdout=PIPE)
+    process = run(f'keybase fs ls "{kbpath_to_upload}" --one', shell=True, stdout=PIPE)
     out = process.stdout.decode()
     kb_folders:list = process_listed_stdout(out)
     if dirname in kb_folders:
@@ -211,16 +218,25 @@ def upload(paths:list):
         if check_name(git_path.name):
             logger.error(f"'{git_path.name}' folder already exists in '{kbpath_to_upload}'")
             continue
-        run(f'keybase fs mkdir {keybase_path}', shell=True)
+        run(f'keybase fs mkdir "{keybase_path}"', shell=True)
+        # Guardamos los archivos que no se estuvieran añadidos al proyecto todavia
+        not_staged = get_no_staged_files(git_path)
+        content = ""
+        for file in not_staged: content += file+"\n"
+        with open(nstaged_name, "w") as file: file.write(content)
+        run(f'keybase fs mv "{nstaged_name}" "{keybase_path}"', shell=True)     
+        # Configuramos un email cualquiers para poder hacer el commit (luego lo vamos a deshacer)
+        run(f'git config user.name "{username}"', shell=True, cwd=git_path)
+        run('git config user.email "<>"', shell=True, cwd=git_path)
+        # Guardamos los cambios que se hayan podido producir 
+        run(f'git add .', shell=True, cwd=git_path)
+        cmd = f'git commit -m "Guardando cambios antes del upload a keybase"'; logger.log(cmd, sysout=False)
+        run(cmd, shell=True, cwd=git_path, stdout=PIPE)
         cmd = 'git rm -rf .'; logger.log(cmd, sysout=False)
         process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
             logger.error("Some errors appeared in the process")
-        run(f'git config user.name "{username}"', shell=True, cwd=git_path)
-        run('git config user.email "<>"', shell=True, cwd=git_path)
-        cmd = 'git commit -m "Keybase Upload"'; logger.log(cmd, sysout=False)
-        run(cmd, shell=True, cwd=git_path, stdout=PIPE)
-        cmd = f"keybase fs mv .git {keybase_path}"; logger.log(cmd, sysout=False)
+        cmd = f'keybase fs mv .git "{keybase_path}"'; logger.log(cmd, sysout=False)
         move = run(cmd, cwd=git_path, shell=True)
         if move.returncode != 0:
             logger.error("Could not move .git folder into keybase")      
@@ -239,21 +255,35 @@ def download(paths:list):
         # Movemos el .git de keybase a su carpeta original y restauramos los archivos
         git_path = Path(path).resolve()
         keybase_path = kbpath_to_upload+"/"+git_path.name
-        cmd =f"keybase fs mv {keybase_path+'/.git'} ."; logger.log(cmd, sysout=False)
+        cmd =f'keybase fs mv "{keybase_path}/.git" .'; logger.log(cmd, sysout=False)
         move = run(cmd, cwd=git_path, stderr=PIPE, stdout=PIPE, shell=True)
         if move.returncode != 0:
             logger.error(f"Could not download .git folder, maybe '{git_path.name}' doesn't exist on keybase")
             continue
         else:
-            cmd = f"keybase fs rm {keybase_path}"; logger.log(cmd, sysout=False)
+            process = run(f'keybase fs read "{keybase_path}/{nstaged_name}"', shell=True, cwd=git_path, stdout=PIPE, stderr=PIPE)
+            if process.returncode == 0:
+                out = process.stdout.decode()
+                not_staged_files = list(filter(lambda line: line != "", out.splitlines()))
+            cmd = f'keybase fs rm "{keybase_path}" -r'; logger.log(cmd, sysout=False)
             run(cmd, shell=True)
-        cmd ='git reset --hard HEAD~1'; logger.log(cmd, sysout=False)
+        # Restauraos los archivos
+        cmd ='git checkout HEAD .'; logger.log(cmd, sysout=False)
+        run(cmd, shell=True, cwd=git_path, stdout=PIPE, stderr=PIPE)
+        # Eliminamos el commit de guardado de cambios
+        cmd ='git reset --soft HEAD~1'; logger.log(cmd, sysout=False)
         process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
         if process.returncode != 0:
             logger.error("Some errors appeared in the process")      
         else:
-            logger.info("Folder restored successfully")  
-
+            logger.info("Folder restored successfully")
+        # Eliminamos los archivos del stage area (added), que se añadieron solo para el commit 
+        # de guardado de cambios (dejamos el proyecto tal y como estaba)   
+        if "not_staged_files" in locals() and len(not_staged_files) > 0:
+            for file in not_staged_files:
+                cmd =f'git restore --staged "{file}"'; logger.log(cmd, sysout=False)
+                process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
+            
 if "__main__" == __name__:
     error = False
     try:
