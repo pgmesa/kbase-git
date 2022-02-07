@@ -19,8 +19,6 @@ if require_d1 > int(dig1) or require_d2 > int(dig2):
     print("[!] ERROR: The python version must be 3.7 or higher")
     exit(1)
 # ---------------------------
-# run("git status main")
-# if 
 
 OS = platform.system()
 
@@ -50,7 +48,7 @@ commands = {
     'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows, -u to execute when logged into this user only",
     'shtasks': "Shows the created tasks",
     'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
-    'update': ""
+    'update': "Updates the program with the new version available from github"
 }
 
 def is_admin():
@@ -80,7 +78,7 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.4
+VERSION = 0.5
 DEBUG = False
 counter_flag = False
 
@@ -144,6 +142,14 @@ def main():
             if '-f' in args:
                 force = True 
             tasks.remove_tasks(OS=OS, force=force)
+        elif command == 'update':
+            logger.info("Searching for updates...")
+            process = Popen('git pull origin main', shell=True, cwd=execution_path)
+            process.wait()
+            if process.returncode != 0:
+                logger.error("Could not update the program")
+            else:
+                logger.info("Program updated successfully")
         else:
             logger.error(f"'{command}' is not a valid command!") 
             print_help()
