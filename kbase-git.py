@@ -78,7 +78,7 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.5
+VERSION = 0.6
 DEBUG = False
 counter_flag = False
 
@@ -288,21 +288,31 @@ def download(paths:list):
             cmd = f'keybase fs rm "{keybase_path}" -r'; logger.log(cmd, sysout=False)
             run(cmd, shell=True)
         # Restauraos los archivos
-        cmd ='git checkout HEAD .'; logger.log(cmd, sysout=False)
-        run(cmd, shell=True, cwd=git_path, stdout=PIPE, stderr=PIPE)
-        # Eliminamos el commit de guardado de cambios
-        cmd ='git reset --soft HEAD~1'; logger.log(cmd, sysout=False)
-        process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
-        if process.returncode != 0:
-            logger.error("Some errors appeared in the process")      
+        if "not_staged_files" in locals():
+            cmd ='git checkout HEAD .'; logger.log(cmd, sysout=False)
+            run(cmd, shell=True, cwd=git_path, stdout=PIPE, stderr=PIPE)
+            # Eliminamos el commit de guardado de cambios
+            cmd ='git reset --soft HEAD~1'; logger.log(cmd, sysout=False)
+            process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
+            if process.returncode != 0:
+                logger.error("Some errors appeared in the process")      
+            else:
+                logger.info("Folder restored successfully")
+            # Eliminamos los archivos del stage area (added), que se añadieron solo para el commit 
+            # de guardado de cambios (dejamos el proyecto tal y como estaba) 
+            if len(not_staged_files) > 0:
+                for file in not_staged_files:
+                    cmd =f'git restore --staged "{file}"'; logger.log(cmd, sysout=False)
+                    process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
         else:
-            logger.info("Folder restored successfully")
-        # Eliminamos los archivos del stage area (added), que se añadieron solo para el commit 
-        # de guardado de cambios (dejamos el proyecto tal y como estaba)   
-        if "not_staged_files" in locals() and len(not_staged_files) > 0:
-            for file in not_staged_files:
-                cmd =f'git restore --staged "{file}"'; logger.log(cmd, sysout=False)
-                process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
+            logger.warning("This repo was uploaded with an old version of the program")
+            # Antiguo Kbase-git (por si algún proyecto se subió de la forma antigua)
+            cmd ='git reset --hard HEAD~1'; logger.log(cmd, sysout=False)
+            process = run(cmd, shell=True, cwd=git_path, stdout=PIPE)
+            if process.returncode != 0:
+                logger.error("Some errors appeared in the process")      
+            else:
+                logger.info("Folder restored successfully")
             
 if "__main__" == __name__:
     error = False
