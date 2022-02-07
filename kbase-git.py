@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+import ctypes
 import platform
 import traceback
 from time import sleep
@@ -44,11 +45,20 @@ nstaged_name = "__not-staged__"
 commands = {
     'upload': "Uploads the .git folder to keybase and removes the project locally, -g for configured paths in .json",
     'download': "Downloads the .git folder from keybase and restores the project, -g for configured paths in .json",
-    'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows",
+    'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows, -u to execute when logged into this user only",
     'shtasks': "Shows the created tasks",
     'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
 }
 
+def is_admin():
+    try: return ctypes.windll.shell32.IsUserAnAdmin()
+    except: return False
+
+
+if OS == "Windows" and len(sys.argv) >= 2 and "mktasks" == sys.argv[1] and not is_admin() and not "-u" in sys.argv:
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv + ["--pause"]), None, 1)
+    exit()
+    
 print("Initializing program...")
 # -- Global logger config
 title = f"{username}"; title_end = ""
@@ -67,7 +77,7 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.3
+VERSION = 0.4
 DEBUG = False
 counter_flag = False
 
@@ -92,9 +102,9 @@ def main():
     if len(args) > 0:
         command = args[0]
         paths = [dir_]
-        if command == 'upload' or command == 'download':
-            if "--counter" in args:
+        if "--counter" in args:
                 counter_flag = True
+        if command == 'upload' or command == 'download':
             if "-g" in args: 
                 paths:list = config['paths']
                 if len(paths) == 0:
@@ -119,10 +129,11 @@ def main():
                 download(paths=paths)
         elif command == 'mktasks':
             override = False
-            if '-o' in args:
-                override = True
+            if '-o' in args: override = True
+            cuse_only = False
+            if '-u' in args: cuse_only = True
             configured_tasks = config["tasks"]
-            tasks.create_task(OS, configured_tasks, override=override)
+            tasks.create_task(OS, configured_tasks, override=override, current_user=cuse_only)
         elif command == 'shtasks':
             tasks.show_tasks(OS=OS)
         elif command == 'rmtasks':  
@@ -307,6 +318,6 @@ if "__main__" == __name__:
     if counter_flag:
         print(f"[%] Program will exit in {time_to_exit} seconds:")
         init_counter(time_to_exit)
-    if error: 
+    if error or "--pause" in sys.argv: 
         input("-> Press Enter to exit")
-        exit(1)
+        if error: exit(1)

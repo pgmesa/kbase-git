@@ -6,13 +6,13 @@ from pathlib import Path
 from subprocess import CalledProcessError, Popen, run, PIPE
 
 win_tasks_dir = "KbaseGitTasks"
-task_command = "kbase-git upload -g --counter -a"
+task_command = "kbase-git upload -g -a"
 execution_path = Path(__file__).resolve().parent
 # -- Logger
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-def create_task(OS:str, tasks:dict, override=False):
+def create_task(OS:str, tasks:dict, override=False, current_user:bool=False):
     if override:
         remove_tasks(OS, force=True)
     if OS == "Windows":
@@ -24,8 +24,9 @@ def create_task(OS:str, tasks:dict, override=False):
                         f"\n     ERR MSG -> {err}")
                 logger.error(msg)
                 continue
+            np = "" if current_user else "/NP"
             cmd = (f'SCHTASKS /CREATE /SC DAILY /TN "{win_tasks_dir}\\{task_name}" ' +
-                    f'/TR "{task_command}" /ST {time}') # /RU SYSTEM
+                    f'/TR "{task_command}" /ST {time} {np}') 
             logger.log(cmd, sysout=False)
             logger.info(f"Creating '{task_name}' at '{time}'")
             p = Popen(cmd, shell=True, stderr=PIPE)
