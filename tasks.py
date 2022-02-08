@@ -80,7 +80,8 @@ def show_tasks(OS:str):
         out = run(cmd, shell=True, check=True, stderr=PIPE, stdout=PIPE).stdout.decode()[:-2]
         logger.log(out)
     else:
-        for task in tasks: logger.log("     ->", task)
+        for task in tasks: 
+            logger.log("     -> " + task)
     
 def remove_tasks(OS:str, force=False):
     tasks = get_tasks(OS)
