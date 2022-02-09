@@ -50,7 +50,9 @@ commands = {
     'shtasks': "Shows the created tasks",
     'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
     'update': "Updates the program with the new version available from github",
-    'config': "Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix. -n to not try to open VsCode"
+    'config': "Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix. -n to not try to open VsCode",
+    'reinstall': "Reinstalls the program globally, aplying the new updates from 'kbase-git update'", 
+    'uninstall': "Uninstalls the program globally"
 }
 
 def is_admin():
@@ -80,7 +82,7 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.8
+VERSION = 0.9
 DEBUG = False
 counter_flag = False
 
@@ -178,6 +180,13 @@ def main():
                     logger.warning("VsCode not installed or not added to PATH")
                     not_vscode()
             logger.info("Editor opened")
+        elif command == 'reinstall' or command == "uninstall":
+            folder = "win"; extension = ".bat"; slash = "\\"
+            if OS != "Windows":
+                folder = "posix"; extension = ".sh"; slash = "/"
+            scripts_dir = execution_path/'scripts'/folder
+            target_file = "installer"+extension if command == 'reinstall' else "uninstaller"+extension 
+            Popen(f'.{slash}{target_file}', cwd=scripts_dir, shell=True).wait()
         else:
             logger.error(f"'{command}' is not a valid command!") 
             print_help()

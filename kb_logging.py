@@ -1,4 +1,5 @@
 
+import os
 import calendar
 import datetime as dt
 from pathlib import Path
@@ -46,6 +47,8 @@ def stop_log_capture():
     
 def flush():
     run(f'keybase fs mv ./{_log_fname} {_log_file_path}', cwd=execution_path, shell=True, stdout=PIPE)
+    if os.path.exists(execution_path/_log_fname):
+        os.remove(execution_path/_log_fname)
     
 def _generate_logfname(title:str) -> str:
     date = _get_date(path_friendly=True)
