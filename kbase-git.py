@@ -39,7 +39,8 @@ execution_path = Path(__file__).resolve().parent
 
 config_dir = execution_path/'configs'
 config_example = 'example.json'
-config_fpath = config_dir/f'{username}.json'
+config_fname = f'{username}.json'
+config_fpath = config_dir/config_fname
 nstaged_name = "__not-staged__"
 
 commands = {
@@ -49,7 +50,7 @@ commands = {
     'shtasks': "Shows the created tasks",
     'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
     'update': "Updates the program with the new version available from github",
-    'config': "Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix"
+    'config': "Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix. -n to not try to open VsCode"
 }
 
 def is_admin():
@@ -79,7 +80,7 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.7
+VERSION = 0.8
 DEBUG = False
 counter_flag = False
 
@@ -157,6 +158,26 @@ def main():
                 logger.error("Could not update the program")
             else:
                 logger.info("Program updated successfully")
+        elif command == 'config':
+            logger.info(f"Opening {config_fname}")
+            def not_vscode():
+                if OS == "Windows":
+                    logger.info(f"Opening default '{OS}' editor -> 'notepad'...")
+                    Popen(f"notepad {config_fname}", shell=True, cwd=config_dir)
+                else:
+                    logger.info(f"Opening default '{OS}' editor -> 'nano'...")
+                    Popen(f"nano {config_fname}", shell=True, cwd=config_dir).wait()
+            if "-n" in args: 
+                not_vscode()
+            else:
+                try:
+                    logger.info("Trying to open file in VsCode...")
+                    run('code -v', shell=True, check=True, stderr=PIPE, stdout=PIPE)
+                    Popen(f"code {config_fname}", shell=True, cwd=config_dir, stdout=PIPE)
+                except CalledProcessError:
+                    logger.warning("VsCode not installed")
+                    not_vscode()
+            logger.info("Editor opened")
         else:
             logger.error(f"'{command}' is not a valid command!") 
             print_help()
