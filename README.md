@@ -19,11 +19,13 @@ con el fin de que si os roban el ordenador el código fuente que desarrollemos e
 - Para comprobar que esta bien instalado, ejecutad 'kbase-git' desde una terminal de comandos para desplegar la ayuda del programa.
 
 ### Modo de uso
-    - upload: Uploads the .git folder to keybase and removes the project locally, -g for configured paths in .json
-    - download: Downloads the .git folder from keybase and restores the project, -g for configured paths in .json
-    - mktasks: Creates the tasks specified in the <user>.json, -o to override all in windows
-    - shtasks: Shows the created tasks
-    - rmtasks: Removes all tasks created in the system by this program, -f to confirm all in windows
+    - 'upload': "Uploads the .git folder to keybase and removes the project locally, -g for configured paths in .json",
+    - 'download': "Downloads the .git folder from keybase and restores the project, -g for configured paths in .json",
+    - 'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows, -u to execute when logged into this user only",
+    - 'shtasks': "Shows the created tasks",
+    - 'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
+    - 'update': "Updates the program with the new version available from github",
+    - 'config': "Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix. -n to not try to open VsCode"
 Si se pone ['-g'], en vez de mover o descargar el directorio en el que os encontreis, subirá/descargará todos los paths a keybase que hayais puesto en el archivo '[nombre usuario].json'
 
 ##### 'example.json':
@@ -42,4 +44,4 @@ Si se pone ['-g'], en vez de mover o descargar el directorio en el que os encont
 ```
 
 ### Añadir Task en el ordenador
-- Para que se ejecute todos los días varias veces de forma automática del script, hay que crear un TASK en el ordenador que ejecute 'kbase-git -g --counter'. Para ello introducid el comando 'kbase-git mktasks' (se os crearan dos tareas que vienen por defecto). Si quereis cambiar las horas o añadir tasks modificad el '/configs/[user].json' que se os crea en la instalación. 
+- Para que se ejecute todos los días varias veces de forma automática del script, hay que crear un TASK en el ordenador que ejecute 'kbase-git -g -a'. Para ello introducid el comando 'kbase-git mktasks' (se os crearan dos tareas que vienen por defecto). Si quereis cambiar las horas o añadir tasks introducid 'kbase-git config' para modificar el archivo '/configs/[user].json' que se os crea en la instalación. ¡Aseguraos de poner horas en las que el ordenador esté encendido y no lo esteis usando para tranajar en ese proyecto! También guardad los cambios en los archivos que modifiqueis porque si llega la hora de la subida y no habeis hecho ctrl-s en algún archivo los cambios puede que se pierdan.
