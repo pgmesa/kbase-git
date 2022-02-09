@@ -35,7 +35,8 @@ Si se pone ['-g'], en vez de mover o descargar el directorio en el que os encont
     },
     "paths":[
         "C:\\example\\for\\windows\\path",
-        "/example/for/posix/path"
+        "/example/for/posix/path",
+        "~/another/posix/example"
     ]
 }
 ```

@@ -22,9 +22,12 @@ if require_d1 > int(dig1) or require_d2 > int(dig2):
 
 OS = platform.system()
 
-try:
-    username = run("keybase whoami", shell=True, stdout=PIPE, check=True).stdout.decode().strip()
-except:
+# if OS != "Windows":
+#     Popen('run_keybase', shell=True, stdout=PIPE).wait()
+
+p = Popen("keybase whoami", shell=True, stdout=PIPE); p.wait()
+username = p.stdout.read().decode().strip()
+if p.returncode != 0:
     print("[!] Error trying to get keybase username (keybase installed and logged in?)")
     exit(1)
     
@@ -78,7 +81,7 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.6
+VERSION = 0.7
 DEBUG = False
 counter_flag = False
 
@@ -108,6 +111,12 @@ def main():
         if command == 'upload' or command == 'download':
             if "-g" in args: 
                 paths:list = config['paths']
+                if OS != "Windows":
+                    for i, path in enumerate(paths):
+                        if "~" in path:
+                            paths.remove(path)
+                            paths.insert(i, path.replace("~", str(Path.home())))
+                # Chequeamos que los paths son validos
                 if len(paths) == 0:
                     logger.error("No paths configured to upload/download")
                     return
@@ -195,7 +204,7 @@ def print_help():
         print(f"     - {command}: {info}")
 
 def check_name(dirname:str) -> bool:
-    process = run(f'keybase fs ls "{kbpath_to_upload}" --one', shell=True, stdout=PIPE)
+    process = run(f'keybase fs ls "{kbpath_to_upload}" --one --nocolor', shell=True, stdout=PIPE)
     out = process.stdout.decode()
     kb_folders:list = process_listed_stdout(out)
     if dirname in kb_folders:
@@ -213,13 +222,20 @@ def init_counter(seconds:int):
 
 # ------------ Commands --------------
 def upload(paths:list):
-    logger.info("Uploading paths...")  
+    logger.info("Uploading paths...")
+    begins = ['C:\\', 'c:\\']
+    if OS != "Windows": begins = ["/", "~"]
     for path in paths:
-        if type(path) != Path:
-            path = Path(path).resolve()
+        for begin in begins:
+            if path.startswith(begin): break
+        else:        
+            logger.error(f"'{path}' is not a valid path (must start with any of {begins})")
+            continue
         if not os.path.exists(path):
             logger.error(f"'{path}' doesn't exist (ignoring)")
             continue
+        if type(path) != Path:
+            path = Path(path).resolve()
         logger.info(f"Uploading '{path}'...")
         cmd = 'git ls-files'; logger.log(cmd, sysout=False)
         process = run(cmd, shell=True, cwd=path, stdout=PIPE)
@@ -265,12 +281,19 @@ def upload(paths:list):
     
 def download(paths:list):
     logger.info("Downloading paths...")  
+    begins = ['C:\\', 'c:\\']
+    if OS != "Windows": begins = ["/", "~"]
     for path in paths:
-        if type(path) != Path:
-            path = Path(path).resolve()
+        for begin in begins:
+            if path.startswith(begin): break
+        else:        
+            logger.error(f"'{path}' is not a valid path (must start with any of {begins})")
+            continue
         if not os.path.exists(path):
             logger.error(f"'{path}' doesn't exist (ignoring)")
             continue
+        if type(path) != Path:
+            path = Path(path).resolve()
         logger.info(f"Downloading '{path}'...")
         # Movemos el .git de keybase a su carpeta original y restauramos los archivos
         git_path = Path(path).resolve()
