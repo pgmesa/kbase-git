@@ -22,9 +22,6 @@ if require_d1 > int(dig1) or require_d2 > int(dig2):
 
 OS = platform.system()
 
-# if OS != "Windows":
-#     Popen('run_keybase', shell=True, stdout=PIPE).wait()
-
 p = Popen("keybase whoami", shell=True, stdout=PIPE); p.wait()
 username = p.stdout.read().decode().strip()
 if p.returncode != 0:
@@ -51,7 +48,8 @@ commands = {
     'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows, -u to execute when logged into this user only",
     'shtasks': "Shows the created tasks",
     'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
-    'update': "Updates the program with the new version available from github"
+    'update': "Updates the program with the new version available from github",
+    'config': "Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix"
 }
 
 def is_admin():
