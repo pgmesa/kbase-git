@@ -36,26 +36,27 @@ def create_task(OS:str, tasks:dict, override=False, current_user:bool=False):
             else:
                 logger.info("Task created successfully", sysout=False)
     else:
-        # Comprobamos si cron esta corriendo
-        out = run('service cron status', shell=True, stdout=PIPE).stdout.decode()
-        if "cron is not running" in out:
-            logger.info("(sudo) Activando servicio de cron para crear tareas...")
-            cmd = 'sudo service cron start'; logger.log(cmd, sysout=False)
-            p = Popen(cmd, shell=True, stdout=PIPE)
-            p.wait()
-            if p.returncode != 0:
-                logger.error("No se pudo iniciar 'cron deamon'")
-                return
-        # Comprobamos si los logs del sistema estan activados
-        out = run('service rsyslog status', shell=True, stdout=PIPE).stdout.decode()
-        if "rsyslogd is not running" in out:
-            logger.info("(sudo) Activando servicio de logs del sistema...")
-            cmd = 'sudo service rsyslog start'; logger.log(cmd, sysout=False)
-            p = Popen(cmd, shell=True, stdout=PIPE)
-            p.wait()
-            if p.returncode != 0:
-                logger.error("No se pudo iniciar 'rsyslog deamon'")
-                return
+        if OS == 'Linux':
+            # Comprobamos si cron esta corriendo
+            out = run('service cron status', shell=True, stdout=PIPE).stdout.decode()
+            if "cron is not running" in out:
+                logger.info("(sudo) Activando servicio de cron para crear tareas...")
+                cmd = 'sudo service cron start'; logger.log(cmd, sysout=False)
+                p = Popen(cmd, shell=True, stdout=PIPE)
+                p.wait()
+                if p.returncode != 0:
+                    logger.error("No se pudo iniciar 'cron deamon'")
+                    return
+            # Comprobamos si los logs del sistema estan activados
+            out = run('service rsyslog status', shell=True, stdout=PIPE).stdout.decode()
+            if "rsyslogd is not running" in out:
+                logger.info("(sudo) Activando servicio de logs del sistema...")
+                cmd = 'sudo service rsyslog start'; logger.log(cmd, sysout=False)
+                p = Popen(cmd, shell=True, stdout=PIPE)
+                p.wait()
+                if p.returncode != 0:
+                    logger.error("No se pudo iniciar 'rsyslog deamon'")
+                    return
         extasks = get_tasks(OS)
         if len(extasks) != 0:
             show_tasks(OS)
