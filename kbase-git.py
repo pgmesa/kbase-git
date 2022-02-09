@@ -82,7 +82,7 @@ logging.start_log_capture()
 logger = logging.Logger(module_name=__name__, show_fname=False)
 logger.level = logging.DEBUG
 
-VERSION = 0.9
+VERSION = 1.0
 DEBUG = False
 counter_flag = False
 

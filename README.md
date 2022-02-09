@@ -25,7 +25,9 @@ con el fin de que si os roban el ordenador el código fuente que desarrollemos e
     - 'shtasks': "Shows the created tasks",
     - 'rmtasks': "Removes all tasks created in the system by this program, -f to confirm all in windows",
     - 'update': "Updates the program with the new version available from github",
-    - 'config': "Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix. -n to not try to open VsCode"
+    - config: Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix. -n to not try to open VsCode
+    - reinstall: Reinstalls the program globally, aplying the new updates from 'kbase-git update'
+    - uninstall: Uninstalls the program globally
 Si se pone ['-g'], en vez de mover o descargar el directorio en el que os encontreis, subirá/descargará todos los paths a keybase que hayais puesto en el archivo '[nombre usuario].json'
 
 ##### 'example.json':
