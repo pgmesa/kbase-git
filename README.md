@@ -44,6 +44,6 @@ Si se pone ['-g'], en vez de mover o descargar el directorio en el que os encont
 ```
 
 ### Añadir Task en el ordenador
-!!Para los usuarios de MAC OS
-Primero teneis que permitir el acceso a 'cron' y 'smbd' al disco para que funcione -> https://osxdaily.com/2020/04/27/fix-cron-permissions-macos-full-disk-access/  
-- Para que se ejecute todos los días varias veces de forma automática del script, hay que crear un TASK en el ordenador que ejecute 'kbase-git -g -a'. Para ello introducid el comando 'kbase-git mktasks' (se os crearan dos tareas que vienen por defecto). Si quereis cambiar las horas o añadir tasks introducid 'kbase-git config' para modificar el archivo '/configs/[user].json' que se os crea en la instalación. ¡Aseguraos de poner horas en las que el ordenador esté encendido y no lo esteis usando para tranajar en ese proyecto! También guardad los cambios en los archivos que modifiqueis porque si llega la hora de la subida y no habeis hecho ctrl-s en algún archivo los cambios puede que se pierdan.
+¡¡Para los usuarios de MAC OS!!
+Primero tenéis que permitir el acceso a 'cron' y 'smbd' al disco para que funcione -> https://osxdaily.com/2020/04/27/fix-cron-permissions-macos-full-disk-access/  
+- Para que se ejecute todos los días varias veces de forma automática del script, hay que crear un TASK en el ordenador que ejecute 'kbase-git -g -a'. Para ello introducid el comando 'kbase-git mktasks' (se os crearan dos tareas que vienen por defecto). Si quereis cambiar las horas o añadir tasks introducid 'kbase-git config' para modificar el archivo '/configs/[user].json' que se os crea en la instalación. ¡Aseguraos de poner horas en las que el ordenador esté encendido y no lo esteis usando para trabajar en los proyectos! También guardad los cambios en los archivos que modifiquéis, porque si llega la hora de la subida y no habeis hecho ctrl-s en algún archivo los cambios puede que se pierdan.

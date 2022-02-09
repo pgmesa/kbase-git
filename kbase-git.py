@@ -175,7 +175,7 @@ def main():
                     run('code -v', shell=True, check=True, stderr=PIPE, stdout=PIPE)
                     Popen(f"code {config_fname}", shell=True, cwd=config_dir, stdout=PIPE)
                 except CalledProcessError:
-                    logger.warning("VsCode not installed")
+                    logger.warning("VsCode not installed or not added to PATH")
                     not_vscode()
             logger.info("Editor opened")
         else:
