@@ -255,7 +255,7 @@ def upload(paths:list):
     if OS != "Windows": begins = ["/", "~"]
     for path in paths:
         for begin in begins:
-            if path.startswith(begin): break
+            if str(path).startswith(begin): break
         else:        
             logger.error(f"'{path}' is not a valid path (must start with any of {begins})")
             continue
@@ -313,7 +313,7 @@ def download(paths:list):
     if OS != "Windows": begins = ["/", "~"]
     for path in paths:
         for begin in begins:
-            if path.startswith(begin): break
+            if str(path).startswith(begin): break
         else:        
             logger.error(f"'{path}' is not a valid path (must start with any of {begins})")
             continue
