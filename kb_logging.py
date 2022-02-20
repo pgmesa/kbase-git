@@ -33,7 +33,9 @@ def create_kb_path(logsdir:str) -> str:
     run(f'keybase fs mkdir {logsdir}', shell=True)
     month = calendar.month_name[date.month]; logsdir += f'/{month}'
     run(f'keybase fs mkdir {logsdir}', shell=True)
-    day = date.day; logsdir += f'/{day}'
+    day = date.day
+    if day < 10: day = f"0{day}"
+    logsdir += f'/{day}'
     run(f'keybase fs mkdir {logsdir}', shell=True)
     return logsdir
  

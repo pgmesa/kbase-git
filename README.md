@@ -1,24 +1,39 @@
-# KeyBase-Git
 
-Este programa sirve para subir a keybase de forma automatica y periodica, proyectos de git guardados en el ordenador,
-con el fin de que si os roban el ordenador el código fuente que desarrollemos este encriptado en los servidores de keybase y no en vuestros ordenadores, que por lo general son fáciles de hackear y de acceder a la info que teneis dentro sin el pin.
+# Kbase-Git (OS-Independent)
 
-### Requirements
-- Tener KeyBase instalado y estar loggeado
+This program has been made for developers which are writting code that no one should see, because has commercial purposes or must be secret for whatever reason. The idea is to use the free tool 'keybase' (https://keybase.io/download) for encrypting your data (not even they know what you store -> RSA encryption. Data is encrypted locally with public_key and then sent to the server). 
+
+The program uses 'keybase' and 'git' command line interfaces to upload git projects automatically and periodically to keybase, so that if your computer is stolen, the source code is encrypted in the keybase servers and not in your computer, which is generally easy to hack and gain access to the information you have inside if someone puts effort in it.
+
+Despite the fact that the best practice with this program is to upload manually the code when you have finish your work session (kbase-git upload), the program offers the abilitty to create automated tasks depending on the OS you are using, to ensure that the code is every day uploaded to keybase at the hours you have scheduled, in case you forgot it.
+
+## Project Uploading
+When uploading the project, all tracked files by git will be removed from your computer and then the .git folder will be moved to keybase. A log file will also be created in the "__logs__" directory.
+
+When downloading the project, all files are restored from the .git with their original state (staged or not), leaving the git project as it was when the upload took place (same git logs, commits, added files...) 
+
+## Supported OS
+- Windows
+- Linux [Debian based] (Don't have tested with other linux distributions)
+- Mac
+
+## Requirements
+- Have KeyBase installed and be logged in
 - Python >= 3.7
-- No tiene dependencias externas por lo que no hay que instalar nada con pip (todo módulos itegrados de python)
+- It has no external dependencies so you don't have to install anything with pip (all integrated python modules)
 
-### Configuración de Keybase
-- Para que funcione, tenéis que crearos una cuenta de keybase, y dejar habilitada la opción en settings de nunca cerrar sesión (si os roban el ordenador se puede cerrar la sesión desde otro dispositivo y solo pueden acceder a vuestros datos si están conectados a internet (no habilitéis la opción de sincronizar datos en vuestras carpetas de keybase, ya que esto hace que se pueda acceder a vuestros datos de keybase de forma offline y no queremos eso)).
-- También tenéis que activar la opción de abrir keybase on startup, para que se os inicie cuando encendáis el ordenador (permite que el programa pueda interactuar con keybase sin que toquéis nada)
-- De normal estas dos opciones que os he comentado vienen activadas ya por defecto, pero por si acaso no, activadlas
+## Keybase Configuration
+- For it to work, you have to create a keybase account, and leave the option in settings to never log out enabled (if your computer is stolen, you can log out from another device and they can only access your data if they are connected to the internet (don't enable the option to sync data in your keybase folders, as this makes your keybase data accessible offline and we don't want that)).
+- You also have to activate the option to open keybase on startup, so that it starts when you turn on the computer (it allows the program to interact with keybase without you touching anything)
+- Normally these two options that I have mentioned are already activated by default, but just in case not, activate them
 
-### Instalación
-- Para acceder al script de forma global desde cualquier path y sin tener que ejecutar 'python ...' teneis que ejecutar el instalador correspondiente a vuestro sistema operativo -> 'scripts/[win o posix]/installer[.bat o .sh]' (posix = mac y linux) (en caso de posix, ya están dados los permisos de ejecución a los archivos). El script os pedirá permisos de administrador para que se pueda copiar el script 'kbase-git.[OS]' en una ruta que esté añadida en el PATH del sistema por defecto, 'C:\Windows\System32' (windows) y '/usr/local/bin' (linux y mac).
-- En la instalación se os creará un archivo en 'configs/[vuestro username de keybase].json' donde podréis poner los paths que quereis que se os suban directamente a keybase (mirar 'example.json'). También se os creará una carpeta personal con vuestro nombre de usuario automáticamente en keybase dentro de '/keybase/team/skin4cloud/kbase-git_uploads'
-- Para comprobar que esta bien instalado, ejecutad 'kbase-git' desde una terminal de comandos para desplegar la ayuda del programa.
+## Installation
+- To access the script globally from any path and without having to run 'python ...' you have to run the installer corresponding to your operating system -> 'scripts/[win or posix]/installer[.bat or .sh ]' (posix = mac and linux) (in case of posix, execute permissions are already given to the files). The script will ask you for administrator permissions so that the 'kbase-git.[OS]' script can be copied to a path that is added to the default system PATH, 'C:\Windows\System32' (windows) and ' /usr/local/bin' (linux and mac).
+- During installation, a file will be created in 'configs/[your keybase username].json' where you can put the paths you want to be uploaded directly to keybase (see 'example.json').
+- A folder named 'kbase-git_uploads' will be created in 'keybase/private/[user-name]'
+- To check that it is installed correctly, run 'kbase-git' from a command terminal to display the help of the program.
 
-### Modo de uso
+## How to use
     - 'upload': "Uploads the .git folder to keybase and removes the project locally, -g for configured paths in .json",
     - 'download': "Downloads the .git folder from keybase and restores the project, -g for configured paths in .json",
     - 'mktasks': "Creates the tasks specified in the <user>.json, -o to override all in windows, -u to execute when logged into this user only",
@@ -28,9 +43,9 @@ con el fin de que si os roban el ordenador el código fuente que desarrollemos e
     - config: Opens the <user>.json file in the editor to modify. Tries to open 'VsCode' by default, else 'notepad' on Windows and 'nano' on Posix. -n to not try to open VsCode
     - reinstall: Reinstalls the program globally, aplying the new updates from 'kbase-git update'
     - uninstall: Uninstalls the program globally
-Si se pone ['-g'], en vez de mover o descargar el directorio en el que os encontreis, subirá/descargará todos los paths a keybase que hayais puesto en el archivo '[nombre usuario].json'
+If you put ['-g'], instead of moving or downloading the directory you are in, it will upload/download all the paths to keybase that you have put in the file '[username].json'
 
-##### 'example.json':
+#### 'example.json':
 ```
 {
     "tasks":{
@@ -45,7 +60,7 @@ Si se pone ['-g'], en vez de mover o descargar el directorio en el que os encont
 }
 ```
 
-### Añadir Task en el ordenador
-¡¡Para los usuarios de MAC OS!!
-Primero tenéis que permitir el acceso a 'cron' y 'smbd' al disco para que funcione -> https://osxdaily.com/2020/04/27/fix-cron-permissions-macos-full-disk-access/  
-- Para que se ejecute todos los días varias veces de forma automática del script, hay que crear un TASK en el ordenador que ejecute 'kbase-git -g -a'. Para ello introducid el comando 'kbase-git mktasks' (se os crearan dos tareas que vienen por defecto). Si quereis cambiar las horas o añadir tasks introducid 'kbase-git config' para modificar el archivo '/configs/[user].json' que se os crea en la instalación. ¡Aseguraos de poner horas en las que el ordenador esté encendido y no lo esteis usando para trabajar en los proyectos! También guardad los cambios en los archivos que modifiquéis, porque si llega la hora de la subida y no habeis hecho ctrl-s en algún archivo los cambios puede que se pierdan.
+## Add Task on computer
+For MAC OS users!!
+First you have to allow 'cron' and 'smbd' access to the disk for it to work -> https://osxdaily.com/2020/04/27/fix-cron-permissions-macos-full-disk-access/
+- For the script to run automatically several times every day, you have to create a TASK on the computer that executes 'kbase-git -g -a'. To do this, enter the command 'kbase-git mktasks' (two default tasks will be created for you). If you want to change the hours or add tasks, enter 'kbase-git config' to modify the '/configs/[user].json' file that is created in the installation and retype 'kbase-git mktasks'. Make sure to put times when the computer is on and you are not using it to work on projects! Also save the changes in the files that you modify, because if the upload time comes and you have not done ctrl-s in any file, the changes may be lost.

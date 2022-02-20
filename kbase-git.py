@@ -28,7 +28,9 @@ if p.returncode != 0:
     print("[!] Error trying to get keybase username (keybase installed and logged in?)")
     exit(1)
     
-kbpath_to_upload = f"/keybase/team/skin4cloud/kbase-git_uploads/{username}"
+kb_dir = "kbase-git_uploads"
+kbpath_to_upload = f"/keybase/private/{username}/{kb_dir}"
+run(f'keybase fs mkdir {kbpath_to_upload}', shell=True)
 
 # Time the countdown will last (seconds)
 counter = 10
@@ -58,7 +60,6 @@ commands = {
 def is_admin():
     try: return ctypes.windll.shell32.IsUserAnAdmin()
     except: return False
-
 
 if OS == "Windows" and len(sys.argv) >= 2 and "mktasks" == sys.argv[1] and not is_admin() and not "-u" in sys.argv:
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv + ["--pause"]), None, 1)
