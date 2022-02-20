@@ -1,11 +1,13 @@
 
 # Kbase-Git (OS-Independent)
 
-This program has been made for developers which are writting not open source code and don't want anyone to have access to it or don't wan't any platform to analyze their project, because has commercial purposes or must be secret for whatever reason. The idea is to use the free tool 'keybase' (https://keybase.io/download) for encrypting your data (not even they know what you store -> RSA encryption. Data is encrypted locally with public_key and then sent to the server). 
+This program has been made for developers which are writing not open source code and don't want anyone to have access to it or don't wan't any platform to analyze their project, because has commercial purposes or must be secret for whatever reason. The idea is to use the free tool 'keybase' (https://keybase.io/download) for encrypting your data (not even they know what you store -> RSA encryption. Data is encrypted locally with public_key and then sent to the server). 
 
 The program uses 'keybase' and 'git' command line interfaces to upload git projects automatically and periodically to keybase, so that if your computer is stolen, the source code will be encrypted in the keybase servers and not exposed in your computer, which is generally easy to hack and gain access to the information you have inside if someone puts effort in it.
 
 Despite the fact that the best practice with this program is to upload manually the code when you have finished your work session (kbase-git upload), the program offers the abilitty to create automated tasks depending on the OS you are using, to ensure that the code is every day uploaded to keybase at the hours you have scheduled, in case you forgot to upload it manually.
+
+This program is for daily development of the project of each individual of the team, but for storing the git project to work with the team (as github does - push, clone, pull, fetch...) you can use keybase functionality to create repositories (read more about this in the keybase website - https://keybase.io/).
 
 ## Project Uploading
 When uploading the project, all tracked files by git will be removed from your computer and then the .git folder will be moved to keybase. A log file will also be created in the "__logs__" directory.
